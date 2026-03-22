@@ -1,0 +1,112 @@
+.service-city-page {
+  padding: 3rem 0;
+}
+
+.service-city-page__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.service-city-page__crumbs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.service-city-page__crumb {
+  color: LinkText;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.service-city-page__crumb:hover {
+  text-decoration: underline;
+}
+
+.service-city-page__crumb-sep {
+  color: #999;
+}
+
+.service-city-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.service-city-page__title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.service-city-page__meta {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.service-city-page__content {
+  color: #1a1a1a;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.service-city-page__content h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 1.75rem 0 0.75rem 0;
+}
+
+.service-city-page__content p {
+  margin: 0 0 1rem 0;
+}
+
+.service-city-page__content ul {
+  margin: 0 0 1rem 1.25rem;
+}
+
+.service-city-page__actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.service-city-page__button {
+  display: inline-block;
+  padding: 0.9rem 1.25rem;
+  border-radius: 8px;
+  background: #CB356B;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.service-city-page__button:hover {
+  background: #b02d5d;
+}
+
+.service-city-page__button--secondary {
+  background: #f8f9fa;
+  color: #1a1a1a;
+}
+
+.service-city-page__button--secondary:hover {
+  background: #eceff2;
+}
+
+@media (max-width: 480px) {
+  .service-city-page__container {
+    padding: 0 1rem;
+  }
+
+  .service-city-page__title {
+    font-size: 1.8rem;
+  }
+
+  .service-city-page__actions {
+    flex-direction: column;
+  }
+}

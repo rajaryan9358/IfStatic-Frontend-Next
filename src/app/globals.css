@@ -1,0 +1,30 @@
+@import url('https://fonts.cdnfonts.com/css/gellix');
+@import '../index.css';
+@import '../App.css';
+
+/* Shared components */
+@import '../components/Header.css';
+@import '../components/Hero.css';
+@import '../components/Services.css';
+@import '../components/About.css';
+@import '../components/Stats.css';
+@import '../components/Portfolio.css';
+@import '../components/Testimonials.css';
+@import '../components/WhyChooseUs.css';
+@import '../components/Team.css';
+@import '../components/Contact.css';
+@import '../components/Footer.css';
+@import '../components/RequestQuoteModal.css';
+@import '../components/Toast.css';
+
+/* Public pages */
+@import '../views/AboutPage.css';
+@import '../views/ServiceDetail.css';
+@import '../views/ServicesPage.css';
+@import '../views/ServiceCitiesPage.css';
+@import '../views/ServiceCityDetailPage.css';
+@import '../views/Contact.css';
+@import '../views/ProjectDetails.css';
+@import '../views/PortfolioPage.css';
+@import '../views/BlogsPage.css';
+@import '../views/BlogDetails.css';
