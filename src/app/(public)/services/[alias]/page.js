@@ -9,6 +9,22 @@ import {
 const getAlias = (resolvedParams) =>
   resolvedParams?.alias ? String(resolvedParams.alias) : '';
 
+const toNonEmptyString = (value) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized || undefined;
+};
+
+export async function generateMetadata({ params }) {
+  const resolvedParams = (await params) || {};
+  const alias = getAlias(resolvedParams);
+  const service = await fetchServiceByAliasServer(alias);
+
+  return {
+    title: toNonEmptyString(service?.metaTitle),
+    description: toNonEmptyString(service?.metaDescription),
+  };
+}
+
 export default async function ServiceDetailRoute({ params }) {
   const resolvedParams = (await params) || {};
   const alias = getAlias(resolvedParams);
@@ -28,6 +44,7 @@ export default async function ServiceDetailRoute({ params }) {
 
   return (
     <><ServiceDetail
+      key={serviceAlias || alias}
         initialService={service}
         initialPortfolios={portfoliosResult.data}
         initialPortfoliosIsFallback={portfoliosResult.isFallback}

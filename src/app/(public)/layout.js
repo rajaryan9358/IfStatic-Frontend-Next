@@ -4,11 +4,13 @@ import Script from 'next/script';
 import { headers } from 'next/headers';
 
 import DevSeoBodyGuard from '@/components/DevSeoBodyGuard';
+import SeoRouteSync from '@/components/SeoRouteSync';
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchServicesMinimalServer } from '@/services/publicData.service';
 import { getSeoMeta } from '@/lib/seoMeta.server';
+import { mapPathToSeoQuery } from '@/lib/seoRoute';
 import {
   extractFirstScriptContent,
   extractNoScriptBlock,
@@ -20,76 +22,6 @@ export const dynamic = 'force-dynamic';
 const getSeoMetaCached = cache(async (pageType, subType) =>
   getSeoMeta({ pageType, subType })
 );
-
-const normalizePathPart = (value) =>
-  decodeURIComponent(String(value || ''))
-    .trim()
-    .toLowerCase()
-    .replace(/^\/+/g, '')
-    .replace(/\/+$/g, '')
-    .replace(/\s+/g, '-');
-
-const mapPathToSeoQuery = (pathname) => {
-  const raw = String(pathname || '/');
-  const pathOnly = (() => {
-    try {
-      if (raw.startsWith('http://') || raw.startsWith('https://')) {
-        return new URL(raw).pathname;
-      }
-    } catch {}
-    return raw;
-  })();
-
-  const path = pathOnly.split('?')[0];
-  const parts = path.split('/').filter(Boolean);
-
-  if (parts.length === 0) return { pageType: 'home', subType: '' };
-
-  if (parts[0] === 'about') return { pageType: 'about', subType: '' };
-  if (parts[0] === 'contact') return { pageType: 'contact', subType: '' };
-  if (parts[0] === 'privacy-policy') return { pageType: 'privacy', subType: '' };
-  if (parts[0] === 'terms-and-conditions') return { pageType: 'terms', subType: '' };
-
-  if (parts[0] === 'services') {
-    const alias = parts[1] ? normalizePathPart(parts[1]) : '';
-    const third = parts[2] ? normalizePathPart(parts[2]) : '';
-
-    // /services/:alias/:citySlug (exclude the cities listing route)
-    if (alias && third && third !== 'cities') {
-      return {
-        pageType: 'service_city',
-        subType: `${alias}/${third}`,
-      };
-    }
-
-    return {
-      pageType: 'services',
-      subType: alias,
-    };
-  }
-
-  if (parts[0] === 'portfolio') {
-    return {
-      pageType: 'portfolios',
-      subType: parts[1] ? normalizePathPart(parts[1]) : '',
-    };
-  }
-
-  if (parts[0] === 'blogs') {
-    const normalized = parts[1] ? normalizePathPart(parts[1]) : '';
-    return { pageType: 'blogs', subType: normalized === 'all' ? '' : normalized };
-  }
-
-  if (parts[0] === 'blog' && parts[1]) {
-    return { pageType: 'blogdetail', subType: normalizePathPart(parts[1]) };
-  }
-
-  if (parts[0] === 'project' && parts[1]) {
-    return { pageType: 'projects', subType: normalizePathPart(parts[1]) };
-  }
-
-  return { pageType: 'home', subType: '' };
-};
 
 const toPathname = (rawValue) => {
   const raw = String(rawValue || '').trim();
@@ -182,14 +114,15 @@ export default async function PublicLayout({ children }) {
   return (
     <>
       {process.env.NODE_ENV !== 'production' ? <DevSeoBodyGuard /> : null}
+      <SeoRouteSync initialPathname={pathname} initialMeta={meta} />
       {/* body_tag_manager must be FIRST inside <body> */}
       {gtmNoScriptInner ? (
-        <noscript dangerouslySetInnerHTML={{ __html: gtmNoScriptInner }} />
+        <noscript data-ifstatic-body-tag-manager="true" dangerouslySetInnerHTML={{ __html: gtmNoScriptInner }} />
       ) : null}
 
       {/* head_tag_manager: GTM script in <head> */}
       {gtmHeadJs ? (
-        <Script id="gtm" strategy="beforeInteractive">
+        <Script id="gtm" data-ifstatic-seo="head-tag-manager" strategy="beforeInteractive">
           {gtmHeadJs}
         </Script>
       ) : null}
@@ -199,6 +132,7 @@ export default async function PublicLayout({ children }) {
         <Script
           id="jsonld"
           type="application/ld+json"
+          data-ifstatic-seo="jsonld"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: jsonLd }}
         />

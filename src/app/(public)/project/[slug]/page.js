@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import ProjectDetails from '@/views/ProjectDetails';
 import {
   fetchPortfolioBySlugServer,
+  fetchPortfolioMetaBySlugServer,
   fetchPortfoliosServer,
   fetchServicesServer,
   fetchTestimonialsServer,
@@ -12,6 +13,11 @@ export const revalidate = 60;
 
 const getSlug = (resolvedParams) =>
   resolvedParams?.slug ? String(resolvedParams.slug) : '';
+
+const toNonEmptyString = (value) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized || undefined;
+};
 
 export async function generateStaticParams() {
   try {
@@ -25,6 +31,17 @@ export async function generateStaticParams() {
   } catch {
     return [];
   }
+}
+
+export async function generateMetadata({ params }) {
+  const resolvedParams = (await params) || {};
+  const slug = getSlug(resolvedParams);
+  const meta = await fetchPortfolioMetaBySlugServer(slug);
+
+  return {
+    title: toNonEmptyString(meta?.metaTitle),
+    description: toNonEmptyString(meta?.metaDescription),
+  };
 }
 
 export default async function ProjectDetailsRoute({ params }) {

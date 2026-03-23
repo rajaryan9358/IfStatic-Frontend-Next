@@ -4,6 +4,22 @@ import { fetchBlogBySlugServer, fetchBlogsServer } from '@/services/publicData.s
 const getSlug = (resolvedParams) =>
   resolvedParams?.slug ? String(resolvedParams.slug) : '';
 
+const toNonEmptyString = (value) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized || undefined;
+};
+
+export async function generateMetadata({ params }) {
+  const resolvedParams = (await params) || {};
+  const slug = getSlug(resolvedParams);
+  const blog = await fetchBlogBySlugServer(slug);
+
+  return {
+    title: toNonEmptyString(blog?.metaTitle),
+    description: toNonEmptyString(blog?.metaDescription),
+  };
+}
+
 export default async function BlogDetailsRoute({ params }) {
   const resolvedParams = (await params) || {};
   const slug = getSlug(resolvedParams);
