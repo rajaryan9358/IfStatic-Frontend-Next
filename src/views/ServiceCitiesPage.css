@@ -1,28 +1,122 @@
-/* Service Cities Page */
 .service-cities-page {
-  padding: 3rem 0;
+  min-height: 100vh;
+  padding: 2.5rem 0 4rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
 }
 
 .service-cities-page__container {
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
+.service-cities-page__hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
 .service-cities-page__title {
-  font-size: 2rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
+  color: #CB356B;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.1;
 }
 
 .service-cities-page__subtitle {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
   color: #666;
-  margin: 0 0 1.75rem 0;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-/* Two columns */
+.service-cities-page__search-wrap {
+  max-width: 860px;
+  margin: 0 auto 1.75rem;
+  position: relative;
+}
+
+.service-cities-page__search-icon {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.45rem;
+  color: #a6afbd;
+  pointer-events: none;
+}
+
+.service-cities-page__search {
+  width: 100%;
+  height: 58px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #ffffff;
+  padding: 0 1.25rem 0 3.75rem;
+  font-size: 1rem;
+  color: #374151;
+  outline: none;
+  box-shadow: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.service-cities-page__search:focus {
+  border-color: rgba(203, 53, 107, 0.4);
+  box-shadow: 0 0 0 3px rgba(203, 53, 107, 0.08);
+}
+
+.service-cities-page__search::placeholder {
+  color: #99a2b1;
+}
+
+.service-cities-page__tabs {
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  gap: 0.6rem;
+  margin: 0 auto 1.75rem;
+  padding: 0.45rem;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  border: 1px solid #edf0f5;
+}
+
+.service-cities-page__tab {
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  font-weight: 700;
+  font-size: 0.98rem;
+  padding: 0.95rem 2.2rem;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.service-cities-page__tab.is-active {
+  color: #ffffff;
+  background: #cb356b;
+  box-shadow: 0 8px 20px rgba(203, 53, 107, 0.22);
+}
+
+.service-cities-page__section {
+  background: linear-gradient(135deg, #fef5f8 0%, #fff0f5 100%);
+  border: 1px solid #eef1f6;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
+}
+
+.service-cities-page__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
 .service-cities-page__columns {
   display: flex;
   gap: 2.5rem;
@@ -35,35 +129,132 @@
 }
 
 .service-cities-page__column-title {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 1rem 0;
+  margin: 0;
 }
 
-/* Vertical list: one link per row */
-.service-cities-page__list {
+.service-cities-page__count {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.service-cities-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.service-cities-page__card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 92px;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #edf0f5;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.service-cities-page__card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(203, 53, 107, 0.22);
+  box-shadow: 0 14px 30px rgba(203, 53, 107, 0.14);
+}
+
+.service-cities-page__card-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.service-cities-page__icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cb356b;
+  background: rgba(203, 53, 107, 0.1);
+  flex-shrink: 0;
+}
+
+.service-cities-page__icon-svg {
+  width: 22px;
+  height: 22px;
+}
+
+.service-cities-page__card-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
-.service-cities-page__link {
-  display: block;
-  width: 100%;
-  color: LinkText;
-  font-weight: 600;
+.service-cities-page__card-city {
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.service-cities-page__card-service {
+  color: #6b7280;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.service-cities-page__card-arrow {
+  color: #cb356b;
+  font-size: 1.35rem;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.service-cities-page__card:hover .service-cities-page__card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.service-cities-page__empty,
+.service-cities-page__empty-card {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
+}
+
+.service-cities-page__column--single {
+  display: flex;
+  justify-content: center;
+}
+
+.service-cities-page__back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 0.95rem 1.4rem;
+  border-radius: 14px;
+  background: #cb356b;
+  color: #ffffff;
+  font-weight: 700;
   text-decoration: none;
-  line-height: 1.5;
-  padding: 0.25rem 0;
-}
-
-.service-cities-page__link:visited {
-  color: VisitedText;
-}
-
-.service-cities-page__link:hover {
-  text-decoration: underline;
+  box-shadow: 0 12px 24px rgba(203, 53, 107, 0.2);
 }
 
 @media (max-width: 768px) {
@@ -71,14 +262,55 @@
     padding: 0 1.5rem;
   }
 
-  .service-cities-page__columns {
+  .service-cities-page__title {
+    font-size: 2.4rem;
+  }
+
+  .service-cities-page__search {
+    height: 62px;
+    font-size: 1rem;
+    padding-left: 3.6rem;
+  }
+
+  .service-cities-page__tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .service-cities-page__tab {
+    padding: 1rem 1rem;
+  }
+
+  .service-cities-page__section-head {
     flex-direction: column;
-    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  .service-cities-page__grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
   .service-cities-page__container {
     padding: 0 1rem;
+  }
+
+  .service-cities-page__title {
+    font-size: 2rem;
+  }
+
+  .service-cities-page__search-wrap {
+    margin-bottom: 1.4rem;
+  }
+
+  .service-cities-page__search {
+    height: 58px;
+    border-radius: 16px;
+  }
+
+  .service-cities-page__section {
+    padding: 1rem;
   }
 }

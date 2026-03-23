@@ -71,13 +71,16 @@
 }
 
 .project-hero-image {
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   display: flex;
   justify-content: center;
+  margin: 0 auto;
 }
 
 .project-preview-image {
-  width: min(100%, 1100px);
+  width: auto;
+  max-width: min(100%, 1100px);
   max-height: 70vh; /* was clamp(...) */
   height: auto;
   object-fit: contain;

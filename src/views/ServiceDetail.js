@@ -284,7 +284,7 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
       <motion.section
         className="service-hero"
         variants={sectionVariants}
-        initial="hidden"
+        initial={false}
         animate="visible"
         transition={sectionTransition(0)}
       >

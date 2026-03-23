@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 const getIsMobile = () => (typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
 
 const Header = ({ services = [] }) => {
-  const router = useRouter();
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -72,18 +71,16 @@ const Header = ({ services = [] }) => {
   };
 
   const handleServicesClick = (e) => {
+    e.preventDefault();
     if (isMobileView) {
       if (!isServicesOpen) {
-        e.preventDefault();
         setIsServicesOpen(true);
         return;
       }
       setIsServicesOpen(false);
-      handleNavItemClick();
       return;
     }
-    setIsServicesOpen(false);
-    handleNavItemClick();
+    setIsServicesOpen((prev) => !prev);
   };
 
   return (
@@ -118,15 +115,15 @@ const Header = ({ services = [] }) => {
             onMouseEnter={() => setIsServicesOpen(true)}
             onMouseLeave={() => setIsServicesOpen(false)}
           >
-            <Link
-              href="/services"
+            <button
+              type="button"
               className={`nav-link dropdown-toggle ${isServicesPage && !isContactPage ? 'active' : ''}`}
               onClick={handleServicesClick}
               onKeyDown={handleServicesKeyDown}
             >
               Services
               <span className="dropdown-arrow">▼</span>
-            </Link>
+            </button>
             {isServicesOpen && (
               <div
                 className="dropdown-menu"
