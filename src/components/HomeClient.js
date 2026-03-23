@@ -7,7 +7,6 @@ import Stats from '@/components/Stats';
 import Portfolio from '@/components/Portfolio';
 import Testimonials from '@/components/Testimonials';
 import WhyChooseUs from '@/components/WhyChooseUs';
-import Team from '@/components/Team';
 import Contact from '@/components/Contact';
 
 const buildSections = (initialServices, initialPortfolios, initialPortfoliosIsFallback, initialTestimonials) => ([
@@ -29,7 +28,6 @@ const buildSections = (initialServices, initialPortfolios, initialPortfoliosIsFa
     key: 'testimonials',
     render: () => <Testimonials initialTestimonials={initialTestimonials} pagePath="/" />,
   },
-  { key: 'team', render: () => <Team /> },
   { key: 'contact', render: () => <Contact /> },
 ]);
 

@@ -17,12 +17,13 @@ const sectionTransition = (delay = 0) => ({
   delay
 });
 
+const normalizeAlias = (value) => String(value || '').trim().toLowerCase();
 const stripHtmlTags = (value) => String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
 const ServiceDetail = ({ initialService = null, initialPortfolios = null, initialPortfoliosIsFallback = false, initialTestimonials = null, initialTestimonialsIsFallback = false, sectionVisibility = null, alias = '' }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const aliasFromUrl = useMemo(() => alias || pathname?.split('/')?.filter(Boolean).pop() || '', [alias, pathname]);
+  const aliasFromUrl = useMemo(() => normalizeAlias(alias || pathname?.split('/')?.filter(Boolean).pop() || ''), [alias, pathname]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [service, setService] = useState(initialService || null);
   const [portfolioItems, setPortfolioItems] = useState(Array.isArray(initialPortfolios) ? initialPortfolios : []);
@@ -39,10 +40,20 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
   const [toolPopupPos, setToolPopupPos] = useState({ top: 0, left: 0 });
   const hideToolTimerRef = useRef(null);
   const autoScrollRef = useRef(null);
+  const previousAliasRef = useRef(aliasFromUrl);
 
 
   const servicePagePath = `/services/${aliasFromUrl}`;
   const resolvedService = service || {};
+  const initialServiceAlias = useMemo(() => normalizeAlias(initialService?.alias), [initialService?.alias]);
+  const serviceAlias = useMemo(() => normalizeAlias(service?.alias), [service?.alias]);
+  const hasMismatchedIncomingService = Boolean(aliasFromUrl && initialServiceAlias && initialServiceAlias !== aliasFromUrl);
+  const isRouteTransitioning = Boolean(
+    aliasFromUrl && (
+      (initialServiceAlias && initialServiceAlias !== aliasFromUrl) ||
+      (serviceAlias && serviceAlias !== aliasFromUrl)
+    )
+  );
 
   const visibility = sectionVisibility && typeof sectionVisibility === 'object' ? sectionVisibility : {};
   const showHero = visibility.hero !== false;
@@ -223,11 +234,28 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
   const handlePopupLeave = () => setHoveredTool(null);
 
   useEffect(() => {
-    setPortfolioItems(Array.isArray(initialPortfolios) ? initialPortfolios : []);
-    setService(initialService || null);
-    setErrorMessage(initialService ? '' : 'Service not found.');
-    setIsLoading(!initialService);
-  }, [initialService, initialPortfolios]);
+    const previousAlias = previousAliasRef.current;
+    if (previousAlias && previousAlias !== aliasFromUrl) {
+      stopAutoScroll();
+      setService(null);
+      setPortfolioItems([]);
+      setErrorMessage('');
+      setIsLoading(true);
+      setCurrentIndex(0);
+      setDirection(1);
+      setHoveredTool(null);
+      setOpenFaqIndex(null);
+    }
+    previousAliasRef.current = aliasFromUrl;
+  }, [aliasFromUrl]);
+
+  useEffect(() => {
+    const resolvedInitialService = hasMismatchedIncomingService ? null : (initialService || null);
+    setPortfolioItems(resolvedInitialService && Array.isArray(initialPortfolios) ? initialPortfolios : []);
+    setService(resolvedInitialService);
+    setErrorMessage(hasMismatchedIncomingService ? '' : (resolvedInitialService ? '' : 'Service not found.'));
+    setIsLoading(hasMismatchedIncomingService || !resolvedInitialService);
+  }, [hasMismatchedIncomingService, initialPortfolios, initialService]);
 
   useEffect(() => {
     setOpenFaqIndex(null);
@@ -241,7 +269,7 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
     };
   }, [portfolioItems.length]);
 
-  if (isLoading) {
+  if (isLoading || isRouteTransitioning) {
     return (
       <div className="service-detail-loading-screen" aria-live="polite" aria-busy="true">
         <div className="loading-spinner" aria-hidden="true" />

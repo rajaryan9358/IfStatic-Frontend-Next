@@ -31,11 +31,18 @@ export default async function ProjectDetailsRoute({ params }) {
   const resolvedParams = (await params) || {};
   const slug = getSlug(resolvedParams);
 
-  const [portfolio, services, testimonialsResult] = await Promise.all([
+  const [portfolioResult, servicesResult, testimonialsResult] = await Promise.allSettled([
     fetchPortfolioBySlugServer(slug),
     fetchServicesServer(),
     fetchTestimonialsServer(slug ? `/portfolio/${slug}` : undefined),
   ]);
+
+  const portfolio = portfolioResult.status === 'fulfilled' ? portfolioResult.value : null;
+  const services = servicesResult.status === 'fulfilled' ? servicesResult.value : [];
+  const resolvedTestimonials =
+    testimonialsResult.status === 'fulfilled'
+      ? testimonialsResult.value
+      : { data: [], isFallback: true };
 
   if (!portfolio) {
     notFound();
@@ -48,9 +55,9 @@ export default async function ProjectDetailsRoute({ params }) {
         initialMeta={null}
         initialServices={services}
         initialTestimonials={
-          Array.isArray(testimonialsResult?.data) ? testimonialsResult.data : []
+          Array.isArray(resolvedTestimonials?.data) ? resolvedTestimonials.data : []
         }
-        initialTestimonialsIsFallback={Boolean(testimonialsResult?.isFallback)}
+        initialTestimonialsIsFallback={Boolean(resolvedTestimonials?.isFallback)}
       />
     </>
   );
