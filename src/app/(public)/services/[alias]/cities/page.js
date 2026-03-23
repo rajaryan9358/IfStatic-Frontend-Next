@@ -17,28 +17,6 @@ const slugify = (value) =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 
-const defaultDomesticCities = [
-  'Bengaluru',
-  'Chennai',
-  'Delhi',
-  'Gurugram',
-  'Hyderabad',
-  'Jaipur',
-  'Kolkata',
-  'Mumbai',
-  'Noida',
-  'Pune',
-].map((name) => ({ name, cityName: name, slug: slugify(name), isInternational: false }));
-
-const defaultInternationalCities = [
-  'New York',
-  'London',
-  'Dubai',
-  'Singapore',
-  'Toronto',
-  'Sydney',
-].map((name) => ({ name, cityName: name, slug: slugify(name), isInternational: true }));
-
 const splitCities = (cities) => {
   const domestic = [];
   const international = [];
@@ -85,17 +63,12 @@ export default async function ServiceCitiesRoute({ params }) {
 
   const split = splitCities(normalized);
 
-  const domesticCities = split.domestic.length ? split.domestic : defaultDomesticCities;
-  const internationalCities = split.international.length
-    ? split.international
-    : defaultInternationalCities;
-
   return (
     <ServiceCitiesPage
       serviceAlias={serviceAlias}
       serviceName={serviceName}
-      domesticCities={domesticCities}
-      internationalCities={internationalCities}
+      domesticCities={split.domestic}
+      internationalCities={split.international}
     />
   );
 }

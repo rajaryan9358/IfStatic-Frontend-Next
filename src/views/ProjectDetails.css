@@ -81,7 +81,8 @@
   max-height: 70vh; /* was clamp(...) */
   height: auto;
   object-fit: contain;
-  border-radius: 0;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   display: block;
 }
 

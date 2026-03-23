@@ -29,6 +29,20 @@ const firstMeaningfulElement = (node) => {
   return null;
 };
 
+const getForbiddenBodyNodes = () => {
+  const titleNodes = Array.from(document.querySelectorAll('body title')).filter(
+    (el) => !el.closest('noscript, template')
+  );
+  const descriptionNodes = Array.from(
+    document.querySelectorAll('body meta[name="description"]')
+  ).filter((el) => !el.closest('noscript, template'));
+
+  return {
+    titleNodes,
+    descriptionNodes,
+  };
+};
+
 const findInjectionFromMutations = (mutations) => {
   for (const m of mutations) {
     // Prefer a node that directly contains the forbidden tags.
@@ -47,20 +61,17 @@ const findInjectionFromMutations = (mutations) => {
   return null;
 };
 
-const report = ({ pathname, titleInBody, descInBody, container }) => {
+const report = ({ pathname, titleCount, descCount, container }) => {
   const containerHtml = container?.outerHTML || '';
 
   // eslint-disable-next-line no-console
-  console.error('[SEO Guard] Forbidden head tags rendered inside <body>', {
+  console.warn('[SEO Guard] Removed forbidden head tags from <body>', {
     pathname,
-    titleInBody: Boolean(titleInBody),
-    metaDescriptionInBody: Boolean(descInBody),
+    titleCount,
+    metaDescriptionCount: descCount,
     containerPath: cssPath(container),
     containerHtmlSnippet: String(containerHtml).slice(0, MAX_SNIPPET),
   });
-
-  // eslint-disable-next-line no-console
-  console.trace('[SEO Guard] stack trace');
 };
 
 export default function DevSeoBodyGuard() {
@@ -70,8 +81,9 @@ export default function DevSeoBodyGuard() {
     let lastKey = '';
 
     const check = (mutations) => {
-      const titleInBody = document.querySelector('body title');
-      const descInBody = document.querySelector('body meta[name="description"]');
+      const { titleNodes, descriptionNodes } = getForbiddenBodyNodes();
+      const titleInBody = titleNodes[0] || null;
+      const descInBody = descriptionNodes[0] || null;
 
       if (!titleInBody && !descInBody) return;
 
@@ -79,13 +91,21 @@ export default function DevSeoBodyGuard() {
       const container =
         injection || titleInBody?.parentElement || descInBody?.parentElement || document.body;
 
-      const key = `${pathname}::${Boolean(titleInBody)}::${Boolean(descInBody)}::${cssPath(container)}::${
+      const key = `${pathname}::${titleNodes.length}::${descriptionNodes.length}::${cssPath(container)}::${
         container?.outerHTML?.length || 0
       }`;
       if (key === lastKey) return;
       lastKey = key;
 
-      report({ pathname, titleInBody, descInBody, container });
+      titleNodes.forEach((node) => node.remove());
+      descriptionNodes.forEach((node) => node.remove());
+
+      report({
+        pathname,
+        titleCount: titleNodes.length,
+        descCount: descriptionNodes.length,
+        container,
+      });
     };
 
     // Initial check after hydration.

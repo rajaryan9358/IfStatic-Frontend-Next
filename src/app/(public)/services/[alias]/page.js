@@ -2,6 +2,7 @@ import ServiceDetail from '@/views/ServiceDetail';
 import {
   fetchPortfoliosFilteredServer,
   fetchServiceByAliasServer,
+  fetchServiceCitiesServer,
   fetchTestimonialsServer,
   resolveServiceAlias,
 } from '@/services/publicData.service';
@@ -34,13 +35,20 @@ export default async function ServiceDetailRoute({ params }) {
 
   const serviceAlias = service?.alias || canonicalAlias;
 
-  const [testimonialsResult, portfoliosResult] = await Promise.all([
+  const [testimonialsResult, portfoliosResult, serviceCities] = await Promise.all([
     fetchTestimonialsServer(`/services/${serviceAlias}`),
     fetchPortfoliosFilteredServer({
       serviceAlias,
       serviceId: service?.id,
     }),
+    fetchServiceCitiesServer(serviceAlias),
   ]);
+
+  const hasServiceCities = (Array.isArray(serviceCities) ? serviceCities : []).some((city) => {
+    const cityName = String(city?.cityName || city?.name || '').trim();
+    const citySlug = String(city?.slug || '').trim();
+    return Boolean(cityName && citySlug);
+  });
 
   return (
     <><ServiceDetail
@@ -50,6 +58,7 @@ export default async function ServiceDetailRoute({ params }) {
         initialPortfoliosIsFallback={portfoliosResult.isFallback}
         initialTestimonials={testimonialsResult.data}
         initialTestimonialsIsFallback={testimonialsResult.isFallback}
+        hasServiceCities={hasServiceCities}
         alias={serviceAlias}
       />
     </>

@@ -78,6 +78,11 @@
   transition: all 0.3s ease;
 }
 
+.home-nav-button__icon {
+  display: block;
+  transform: translateY(-2px);
+}
+
 .home-nav-button:hover {
   background: #CB356B;
   color: white;

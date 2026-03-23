@@ -1094,6 +1094,11 @@
   display: flex;
 }
 
+.home-nav-button__icon {
+  display: block;
+  transform: translateY(-2px);
+}
+
 .home-portfolio-navigation.mobile {
   display: none;
   justify-content: center;

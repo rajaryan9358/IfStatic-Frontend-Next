@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import RequestQuoteModal from '../components/RequestQuoteModal';
@@ -20,7 +20,7 @@ const sectionTransition = (delay = 0) => ({
 const normalizeAlias = (value) => String(value || '').trim().toLowerCase();
 const stripHtmlTags = (value) => String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-const ServiceDetail = ({ initialService = null, initialPortfolios = null, initialPortfoliosIsFallback = false, initialTestimonials = null, initialTestimonialsIsFallback = false, sectionVisibility = null, alias = '' }) => {
+const ServiceDetail = ({ initialService = null, initialPortfolios = null, initialPortfoliosIsFallback = false, initialTestimonials = null, initialTestimonialsIsFallback = false, sectionVisibility = null, alias = '', hasServiceCities = false }) => {
   const router = useRouter();
   const pathname = usePathname();
   const aliasFromUrl = useMemo(() => normalizeAlias(alias || pathname?.split('/')?.filter(Boolean).pop() || ''), [alias, pathname]);
@@ -61,7 +61,7 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
   const showTools = visibility.tools !== false;
   const showMobileApps = visibility.mobileApps !== false;
   const showFaqs = visibility.faqs !== false;
-  const showLocalSupportCta = visibility.localSupportCta !== false;
+  const showLocalSupportCta = visibility.localSupportCta !== false && Boolean(hasServiceCities);
   const showPortfolios = visibility.portfolios !== false;
   const showTestimonials = visibility.testimonials !== false;
   const rawFaqs = resolvedService?.faqs;
@@ -233,7 +233,7 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
   const handlePopupEnter = () => clearHideToolTimer();
   const handlePopupLeave = () => setHoveredTool(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previousAlias = previousAliasRef.current;
     if (previousAlias && previousAlias !== aliasFromUrl) {
       stopAutoScroll();
@@ -249,7 +249,7 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
     previousAliasRef.current = aliasFromUrl;
   }, [aliasFromUrl]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const resolvedInitialService = hasMismatchedIncomingService ? null : (initialService || null);
     setPortfolioItems(resolvedInitialService && Array.isArray(initialPortfolios) ? initialPortfolios : []);
     setService(resolvedInitialService);
@@ -547,10 +547,10 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
           {!isSingle && (
             <div className="home-portfolio-navigation desktop">
               <button className="home-nav-button" onClick={() => scroll('left')} aria-label="Previous">
-                ←
+                <span className="home-nav-button__icon">←</span>
               </button>
               <button className="home-nav-button" onClick={() => scroll('right')} aria-label="Next">
-                →
+                <span className="home-nav-button__icon">→</span>
               </button>
             </div>
           )}
@@ -596,10 +596,10 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
         {!isSingle && (
           <div className="home-portfolio-navigation mobile">
             <button className="home-nav-button" onClick={() => scroll('left')} aria-label="Previous">
-              ←
+              <span className="home-nav-button__icon">←</span>
             </button>
             <button className="home-nav-button" onClick={() => scroll('right')} aria-label="Next">
-              →
+              <span className="home-nav-button__icon">→</span>
             </button>
           </div>
         )}

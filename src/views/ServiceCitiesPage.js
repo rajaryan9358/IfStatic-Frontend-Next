@@ -35,27 +35,44 @@ const ServiceCitiesPage = ({
   internationalCities = [],
 }) => {
   const safeName = String(serviceName || 'service').trim() || 'service';
+  const hasAnyCities = (Array.isArray(domesticCities) && domesticCities.length > 0)
+    || (Array.isArray(internationalCities) && internationalCities.length > 0);
 
   return (
     <div className="service-cities-page">
       <div className="service-cities-page__container">
         <h1 className="service-cities-page__title">Looking for local {safeName} support?</h1>
-        <p className="service-cities-page__subtitle">Browse by city:</p>
+        {hasAnyCities ? (
+          <>
+            <p className="service-cities-page__subtitle">Browse by city:</p>
 
-        <div className="service-cities-page__columns">
-          <CityList
-            title="Domestic Cities"
-            items={domesticCities}
-            serviceAlias={serviceAlias}
-            serviceName={safeName}
-          />
-          <CityList
-            title="International Cities"
-            items={internationalCities}
-            serviceAlias={serviceAlias}
-            serviceName={safeName}
-          />
-        </div>
+            <div className="service-cities-page__columns">
+              <CityList
+                title="Domestic Cities"
+                items={domesticCities}
+                serviceAlias={serviceAlias}
+                serviceName={safeName}
+              />
+              <CityList
+                title="International Cities"
+                items={internationalCities}
+                serviceAlias={serviceAlias}
+                serviceName={safeName}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="service-cities-page__subtitle">City-specific pages are not available for this service yet.</p>
+            <div className="service-cities-page__columns">
+              <div className="service-cities-page__column">
+                <Link className="service-cities-page__link" href={`/services/${encodeURIComponent(String(serviceAlias || '').trim())}`}>
+                  Back to {safeName}
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -166,10 +166,10 @@ const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
         {!isSingle && (
           <div className="home-portfolio-navigation desktop">
             <button className="home-nav-button" onClick={() => scroll('left')} aria-label="Previous">
-              ←
+              <span className="home-nav-button__icon">←</span>
             </button>
             <button className="home-nav-button" onClick={() => scroll('right')} aria-label="Next">
-              →
+              <span className="home-nav-button__icon">→</span>
             </button>
           </div>
         )}
@@ -231,10 +231,10 @@ const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
           {!isSingle && (
             <div className="home-portfolio-navigation mobile">
               <button className="home-nav-button" onClick={() => scroll('left')} aria-label="Previous">
-                ←
+                <span className="home-nav-button__icon">←</span>
               </button>
               <button className="home-nav-button" onClick={() => scroll('right')} aria-label="Next">
-                →
+                <span className="home-nav-button__icon">→</span>
               </button>
             </div>
           )}
