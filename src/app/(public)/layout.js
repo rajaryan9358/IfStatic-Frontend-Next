@@ -117,7 +117,7 @@ export default async function PublicLayout({ children }) {
       <SeoRouteSync initialPathname={pathname} initialMeta={meta} />
       {/* body_tag_manager must be FIRST inside <body> */}
       {gtmNoScriptInner ? (
-        <noscript data-ifstatic-body-tag-manager="true" dangerouslySetInnerHTML={{ __html: gtmNoScriptInner }} />
+        <noscript id="ifstatic-body-tag-manager" data-ifstatic-body-tag-manager="true" dangerouslySetInnerHTML={{ __html: gtmNoScriptInner }} />
       ) : null}
 
       {/* head_tag_manager: GTM script in <head> */}

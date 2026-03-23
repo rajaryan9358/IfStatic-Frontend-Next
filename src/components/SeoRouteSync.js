@@ -55,17 +55,14 @@ const safeJsonLd = (jsonString) => {
   }
 };
 
-const removeManagedSeoTags = () => {
-  document.head.querySelectorAll('script#gtm, script#jsonld, script[data-ifstatic-seo]').forEach((node) => node.remove());
-  document.body.querySelectorAll('noscript[data-ifstatic-body-tag-manager]').forEach((node) => node.remove());
-};
-
 const upsertDescription = (content) => {
   const value = toStringSafe(content).trim();
   let el = document.head.querySelector('meta[name="description"]');
 
   if (!value) {
-    el?.remove();
+    if (el) {
+      el.setAttribute('content', '');
+    }
     return;
   }
 
@@ -78,9 +75,42 @@ const upsertDescription = (content) => {
   el.setAttribute('content', value);
 };
 
-const applySeoMetaToDom = (meta) => {
-  removeManagedSeoTags();
+const upsertHeadScript = ({ id, dataType, content, type }) => {
+  let script = document.head.querySelector(`#${id}`);
 
+  if (!script) {
+    script = document.createElement('script');
+    script.id = id;
+    document.head.appendChild(script);
+  }
+
+  if (dataType) {
+    script.dataset.ifstaticSeo = dataType;
+  }
+
+  if (type) {
+    script.type = type;
+  } else {
+    script.removeAttribute('type');
+  }
+
+  script.textContent = toStringSafe(content);
+};
+
+const upsertBodyNoScript = (content) => {
+  let noScript = document.body.querySelector('#ifstatic-body-tag-manager');
+
+  if (!noScript) {
+    noScript = document.createElement('noscript');
+    noScript.id = 'ifstatic-body-tag-manager';
+    noScript.dataset.ifstaticBodyTagManager = 'true';
+    document.body.prepend(noScript);
+  }
+
+  noScript.innerHTML = toStringSafe(content);
+};
+
+const applySeoMetaToDom = (meta) => {
   const title = toStringSafe(meta?.meta_title).trim();
   if (title) {
     document.title = title;
@@ -89,52 +119,43 @@ const applySeoMetaToDom = (meta) => {
   upsertDescription(meta?.meta_description);
 
   const headScript = extractFirstScriptContent(meta?.head_tag_manager);
-  if (headScript) {
-    const script = document.createElement('script');
-    script.id = 'gtm';
-    script.dataset.ifstaticSeo = 'head-tag-manager';
-    script.text = headScript;
-    document.head.appendChild(script);
-  }
+  upsertHeadScript({ id: 'gtm', dataType: 'head-tag-manager', content: headScript });
 
   const jsonLd = safeJsonLd(meta?.meta_schema);
-  if (jsonLd) {
-    const script = document.createElement('script');
-    script.id = 'jsonld';
-    script.type = 'application/ld+json';
-    script.dataset.ifstaticSeo = 'jsonld';
-    script.text = jsonLd;
-    document.head.appendChild(script);
-  }
+  upsertHeadScript({ id: 'jsonld', dataType: 'jsonld', type: 'application/ld+json', content: jsonLd });
 
   const noScriptInner = extractNoScriptInner(meta?.body_tag_manager);
-  if (noScriptInner) {
-    const noScript = document.createElement('noscript');
-    noScript.dataset.ifstaticBodyTagManager = 'true';
-    noScript.innerHTML = noScriptInner;
-    document.body.prepend(noScript);
-  }
+  upsertBodyNoScript(noScriptInner);
 };
 
 const fetchSeoMeta = async (pathname) => {
   const { pageType, subType } = mapPathToSeoQuery(pathname);
-  const url = new URL('/api/backend/public/meta', window.location.origin);
-  url.searchParams.set('page_type', pageType);
-  if (subType) url.searchParams.set('sub_type', subType);
+  const baseCandidates = ['/api/backend/public/meta', '/api/public/meta'];
 
-  const res = await fetch(url.toString(), { cache: 'no-store' });
-  if (!res.ok) {
-    return {
-      meta_title: '',
-      meta_description: '',
-      meta_schema: '',
-      head_tag_manager: '',
-      body_tag_manager: '',
-    };
+  for (const basePath of baseCandidates) {
+    const url = new URL(basePath, window.location.origin);
+    url.searchParams.set('page_type', pageType);
+    if (subType) url.searchParams.set('sub_type', subType);
+
+    const res = await fetch(url.toString(), { cache: 'no-store' });
+    if (!res.ok) {
+      if (res.status === 404) {
+        continue;
+      }
+      break;
+    }
+
+    const json = await res.json().catch(() => ({}));
+    return json?.data || {};
   }
 
-  const json = await res.json().catch(() => ({}));
-  return json?.data || {};
+  return {
+    meta_title: '',
+    meta_description: '',
+    meta_schema: '',
+    head_tag_manager: '',
+    body_tag_manager: '',
+  };
 };
 
 export default function SeoRouteSync({ initialPathname = '/', initialMeta = null }) {
