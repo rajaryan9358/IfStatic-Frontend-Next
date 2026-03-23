@@ -50,7 +50,7 @@ function ContactPage() {
       return;
     }
     setStatus({ state: 'loading', message: 'Submitting your form…' });
-    postJson('/api/contact', {
+    postJson('/api/backend/public/contact-queries', {
       name: formData.name.trim(),
       subject: formData.subject.trim(),
       email: formData.email.trim(),

@@ -122,7 +122,7 @@ const RequestQuoteModal = ({ isOpen, onClose, services = [], defaultServiceAlias
     setSubmitState({ state: 'loading', message: 'Submitting your form…' });
 
     try {
-      await postJson('/api/quote-request', {
+      await postJson('/api/backend/public/quote-requests', {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),

@@ -46,7 +46,7 @@ const Contact = () => {
     setFormStatus({ state: 'loading', message: 'Submitting your form…' });
 
     try {
-      await postJson('/api/contact', {
+      await postJson('/api/backend/public/contact-queries', {
         name: formData.name.trim(),
         subject: formData.subject.trim(),
         email: formData.email.trim(),
