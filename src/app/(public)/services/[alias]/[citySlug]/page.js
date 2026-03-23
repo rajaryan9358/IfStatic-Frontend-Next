@@ -38,10 +38,18 @@ const mergeServiceWithCity = (service, city) => {
   merged.heroMainImage = preferNonEmpty(cityObj.heroMainImage, merged.heroMainImage);
 
   // Process overrides (fallback to service when not set)
-  merged.approachImage = preferNonEmpty(cityObj.approachImage, merged.approachImage);
-  merged.processLabel = preferNonEmpty(cityObj.processLabel, merged.processLabel);
-  merged.processTitle = preferNonEmpty(cityObj.processTitle, merged.processTitle);
-  merged.approachList = preferNonEmptyArray(cityObj.approachList, merged.approachList);
+  if (cityObj.useProcessOverride) {
+    merged.approachImage = preferNonEmpty(cityObj.approachImage, merged.approachImage);
+    merged.processLabel = preferNonEmpty(cityObj.processLabel, merged.processLabel);
+    merged.processTitle = preferNonEmpty(cityObj.processTitle, merged.processTitle);
+    merged.approachList = preferNonEmptyArray(cityObj.approachList, merged.approachList);
+  }
+
+  if (cityObj.useMobileAppsOverride) {
+    merged.mobileAppsLabel = preferNonEmpty(cityObj.mobileAppsLabel, merged.mobileAppsLabel);
+    merged.mobileAppsTitle = preferNonEmpty(cityObj.mobileAppsTitle, merged.mobileAppsTitle);
+    merged.mobileApps = preferNonEmptyArray(cityObj.mobileApps, merged.mobileApps);
+  }
 
   // Tools + mobile apps always from service (no overrides)
 
