@@ -5,11 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { deriveTopicsFromBlogs, shapeBlog, shapeTopic } from '../hooks/blogHelpers';
 import RichText from '../components/RichText';
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-};
+import { useResponsiveSectionVariants } from '../lib/useResponsiveSectionVariants';
 
 const sectionTransition = (delay = 0) => ({
   duration: 0.5,
@@ -31,6 +27,7 @@ const BlogsPage = ({
   initialIsFallback = false,
 } = {}) => {
   const router = useRouter();
+  const sectionVariants = useResponsiveSectionVariants();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');

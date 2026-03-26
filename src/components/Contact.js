@@ -1,21 +1,37 @@
 "use client";
 
 import React, { useState } from 'react';
+import { getPublicApiBaseCandidates, resolvePublicApiUrl } from '@/lib/publicApiBase';
 import Toast from './Toast';
 
-async function postJson(url, payload) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+async function postJson(path, payload) {
+  let lastError = null;
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data?.message || 'Unable to send message right now.');
+  for (const base of getPublicApiBaseCandidates()) {
+    try {
+      const res = await fetch(resolvePublicApiUrl(base, path), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const message = data?.message || 'Unable to send message right now.';
+        if (res.status === 404) {
+          lastError = new Error(message);
+          continue;
+        }
+        throw new Error(message);
+      }
+
+      return data;
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return data;
+  throw lastError || new Error('Unable to send message right now.');
 }
 
 const Contact = () => {
@@ -46,7 +62,7 @@ const Contact = () => {
     setFormStatus({ state: 'loading', message: 'Submitting your form…' });
 
     try {
-      await postJson('/api/backend/public/contact-queries', {
+      await postJson('/contact-queries', {
         name: formData.name.trim(),
         subject: formData.subject.trim(),
         email: formData.email.trim(),

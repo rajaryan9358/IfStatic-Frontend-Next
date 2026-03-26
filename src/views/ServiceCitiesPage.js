@@ -3,6 +3,24 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+const normalizeCityField = (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+
+  const lower = normalized.toLowerCase();
+  if (['null', 'undefined', 'n/a', 'na', 'none'].includes(lower)) {
+    return '';
+  }
+
+  return normalized;
+};
+
+const hasValidCity = (city) => {
+  const cityName = normalizeCityField(city?.cityName || city?.name);
+  const citySlug = normalizeCityField(city?.slug);
+  return Boolean(cityName && citySlug);
+};
+
 const LocationIcon = ({ isInternational = false }) => {
   if (isInternational) {
     return (
@@ -37,8 +55,8 @@ const LocationIcon = ({ isInternational = false }) => {
 const CityCard = ({ city, title, serviceAlias, serviceName, isInternational = false }) => {
   const safeAlias = String(serviceAlias || '').trim();
   const safeName = String(serviceName || 'service').trim() || 'service';
-  const cityName = String(city?.cityName || city?.name || '').trim();
-  const citySlug = String(city?.slug || '').trim();
+  const cityName = normalizeCityField(city?.cityName || city?.name);
+  const citySlug = normalizeCityField(city?.slug);
 
   if (!cityName || !citySlug) return null;
 
@@ -70,25 +88,32 @@ const ServiceCitiesPage = ({
 }) => {
   const safeName = String(serviceName || 'service').trim() || 'service';
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState(
-    Array.isArray(domesticCities) && domesticCities.length > 0 ? 'domestic' : 'international'
+  const validDomesticCities = useMemo(
+    () => (Array.isArray(domesticCities) ? domesticCities : []).filter(hasValidCity),
+    [domesticCities]
   );
-  const hasAnyCities = (Array.isArray(domesticCities) && domesticCities.length > 0)
-    || (Array.isArray(internationalCities) && internationalCities.length > 0);
+  const validInternationalCities = useMemo(
+    () => (Array.isArray(internationalCities) ? internationalCities : []).filter(hasValidCity),
+    [internationalCities]
+  );
+  const [activeTab, setActiveTab] = useState(
+    validDomesticCities.length > 0 ? 'domestic' : 'international'
+  );
+  const hasAnyCities = validDomesticCities.length > 0 || validInternationalCities.length > 0;
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
   const filterCities = (items) =>
     (Array.isArray(items) ? items : []).filter((city) => {
       if (!normalizedSearch) return true;
-      const cityName = String(city?.cityName || city?.name || '').toLowerCase();
+      const cityName = normalizeCityField(city?.cityName || city?.name).toLowerCase();
       return cityName.includes(normalizedSearch);
     });
 
-  const domesticFiltered = useMemo(() => filterCities(domesticCities), [domesticCities, normalizedSearch]);
+  const domesticFiltered = useMemo(() => filterCities(validDomesticCities), [validDomesticCities, normalizedSearch]);
   const internationalFiltered = useMemo(
-    () => filterCities(internationalCities),
-    [internationalCities, normalizedSearch]
+    () => filterCities(validInternationalCities),
+    [validInternationalCities, normalizedSearch]
   );
 
   const activeCities = activeTab === 'international' ? internationalFiltered : domesticFiltered;

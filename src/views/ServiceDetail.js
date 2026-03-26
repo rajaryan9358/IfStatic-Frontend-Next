@@ -5,11 +5,7 @@ import { motion } from 'framer-motion';
 import RequestQuoteModal from '../components/RequestQuoteModal';
 import Testimonials from '../components/Testimonials';
 import RichText from '../components/RichText';
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0 }
-};
+import { useResponsiveSectionVariants } from '../lib/useResponsiveSectionVariants';
 
 const sectionTransition = (delay = 0) => ({
   duration: 0.6,
@@ -20,7 +16,30 @@ const sectionTransition = (delay = 0) => ({
 const normalizeAlias = (value) => String(value || '').trim().toLowerCase();
 const stripHtmlTags = (value) => String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
+const getSliderMetrics = (container) => {
+  if (!container) {
+    return { positions: [] };
+  }
+
+  const cards = Array.from(container.querySelectorAll('.home-portfolio-card'));
+  return {
+    positions: cards.map((card) => card.offsetLeft),
+  };
+};
+
+const getNearestIndex = (container) => {
+  const { positions } = getSliderMetrics(container);
+  if (!positions.length) return 0;
+
+  return positions.reduce((closestIndex, position, index) => {
+    const currentDistance = Math.abs(position - container.scrollLeft);
+    const closestDistance = Math.abs(positions[closestIndex] - container.scrollLeft);
+    return currentDistance < closestDistance ? index : closestIndex;
+  }, 0);
+};
+
 const ServiceDetail = ({ initialService = null, initialPortfolios = null, initialPortfoliosIsFallback = false, initialTestimonials = null, initialTestimonialsIsFallback = false, sectionVisibility = null, alias = '', hasServiceCities = false }) => {
+  const sectionVariants = useResponsiveSectionVariants(32, 8);
   const router = useRouter();
   const pathname = usePathname();
   const aliasFromUrl = useMemo(() => normalizeAlias(alias || pathname?.split('/')?.filter(Boolean).pop() || ''), [alias, pathname]);
@@ -92,9 +111,9 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
   const handleMouseUp = () => {
     setIsDragging(false);
     const container = scrollContainerRef.current;
-    const cardWidth = 900;
-    const gap = 32;
-    const newIndex = Math.round(container.scrollLeft / (cardWidth + gap));
+    if (!container) return;
+    const newIndex = getNearestIndex(container);
+    scrollToIndex(newIndex);
     setCurrentIndex(newIndex);
     startAutoScroll();
   };
@@ -121,9 +140,9 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
 
   const handleTouchEnd = () => {
     const container = scrollContainerRef.current;
-    const cardWidth = 900;
-    const gap = 32;
-    const newIndex = Math.round(container.scrollLeft / (cardWidth + gap));
+    if (!container) return;
+    const newIndex = getNearestIndex(container);
+    scrollToIndex(newIndex);
     setCurrentIndex(newIndex);
     startAutoScroll();
   };
@@ -138,18 +157,16 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
     }
     stopAutoScroll();
     const container = scrollContainerRef.current;
-    const cardWidth = 900;
-    const gap = 32;
-    const scrollAmount = cardWidth + gap;
+    const { positions } = getSliderMetrics(container);
+    if (!positions.length) return;
     
     let newIndex;
     if (direction === 'left') {
       newIndex = Math.max(0, currentIndex - 1);
-      container.scrollLeft -= scrollAmount;
     } else {
       newIndex = Math.min(portfolioItems.length - 1, currentIndex + 1);
-      container.scrollLeft += scrollAmount;
     }
+    scrollToIndex(newIndex);
     setCurrentIndex(newIndex);
     startAutoScroll();
   };
@@ -165,9 +182,8 @@ const ServiceDetail = ({ initialService = null, initialPortfolios = null, initia
   const scrollToIndex = (index) => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const cardWidth = 900;
-    const gap = 32;
-    const scrollAmount = (cardWidth + gap) * index;
+    const { positions } = getSliderMetrics(container);
+    const scrollAmount = positions[index] ?? 0;
     container.scrollTo({
       left: scrollAmount,
       behavior: 'smooth'

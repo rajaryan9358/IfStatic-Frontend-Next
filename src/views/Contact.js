@@ -4,22 +4,36 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
 import Toast from '../components/Toast';
+import { getPublicApiBaseCandidates, resolvePublicApiUrl } from '@/lib/publicApiBase';
+import { useResponsiveSectionVariants } from '../lib/useResponsiveSectionVariants';
 
-async function postJson(url, payload) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.message || 'Unable to send message right now.');
-  return data;
+async function postJson(path, payload) {
+  let lastError = null;
+
+  for (const base of getPublicApiBaseCandidates()) {
+    try {
+      const res = await fetch(resolvePublicApiUrl(base, path), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const message = data?.message || 'Unable to send message right now.';
+        if (res.status === 404) {
+          lastError = new Error(message);
+          continue;
+        }
+        throw new Error(message);
+      }
+      return data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error('Unable to send message right now.');
 }
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 }
-};
 
 const sectionTransition = (delay = 0) => ({
   duration: 0.5,
@@ -28,6 +42,7 @@ const sectionTransition = (delay = 0) => ({
 });
 
 function ContactPage() {
+  const sectionVariants = useResponsiveSectionVariants();
   const [formData, setFormData] = useState({
     name: '',
     subject: '',
@@ -50,7 +65,7 @@ function ContactPage() {
       return;
     }
     setStatus({ state: 'loading', message: 'Submitting your form…' });
-    postJson('/api/backend/public/contact-queries', {
+    postJson('/contact-queries', {
       name: formData.name.trim(),
       subject: formData.subject.trim(),
       email: formData.email.trim(),

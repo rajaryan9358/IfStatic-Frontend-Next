@@ -15,6 +15,24 @@ const toNonEmptyString = (value) => {
   return normalized || undefined;
 };
 
+const normalizeCityField = (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+
+  const lower = normalized.toLowerCase();
+  if (['null', 'undefined', 'n/a', 'na', 'none'].includes(lower)) {
+    return '';
+  }
+
+  return normalized;
+};
+
+const hasValidServiceCity = (city) => {
+  const cityName = normalizeCityField(city?.cityName || city?.name);
+  const citySlug = normalizeCityField(city?.slug);
+  return Boolean(cityName && citySlug);
+};
+
 export async function generateMetadata({ params }) {
   const resolvedParams = (await params) || {};
   const alias = getAlias(resolvedParams);
@@ -44,11 +62,7 @@ export default async function ServiceDetailRoute({ params }) {
     fetchServiceCitiesServer(serviceAlias),
   ]);
 
-  const hasServiceCities = (Array.isArray(serviceCities) ? serviceCities : []).some((city) => {
-    const cityName = String(city?.cityName || city?.name || '').trim();
-    const citySlug = String(city?.slug || '').trim();
-    return Boolean(cityName && citySlug);
-  });
+  const hasServiceCities = (Array.isArray(serviceCities) ? serviceCities : []).some(hasValidServiceCity);
 
   return (
     <><ServiceDetail

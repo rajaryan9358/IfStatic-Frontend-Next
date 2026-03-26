@@ -201,7 +201,7 @@
 }
 
 @media (max-width: 600px) {
-  .contact-page { padding: 3.5rem 0 4rem; }
+  .contact-page { padding: 4.5rem 0 4rem; }
   .contact-inner { padding: 0 1.25rem; }
   .contact-title { font-size: 2rem; }
   .info-icon { width: 34px; height: 34px; }

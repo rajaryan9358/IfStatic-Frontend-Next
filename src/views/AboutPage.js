@@ -3,11 +3,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Team from '../components/Team';
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 }
-};
+import { useResponsiveSectionVariants } from '../lib/useResponsiveSectionVariants';
 
 const sectionTransition = (delay = 0) => ({
   duration: 0.5,
@@ -17,6 +13,7 @@ const sectionTransition = (delay = 0) => ({
 
 const AboutPage = () => {
   const router = useRouter();
+  const sectionVariants = useResponsiveSectionVariants();
 
   return (
     <>

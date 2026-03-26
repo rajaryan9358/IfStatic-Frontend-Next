@@ -33,10 +33,10 @@
 }
 
 .about-page .about-hero-title {
-  font-size: 2.8rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 0.6rem;
+  margin-bottom: 1.5rem;
   line-height: 1.1;
 }
 
@@ -97,7 +97,7 @@
     padding-top: 1.5rem; /* was 2.5rem */
   }
   .about-hero {
-    padding: 0.25rem 1rem 2.5rem; /* was 0.5rem 1rem 2.5rem */
+    padding: 1.25rem 0 2.5rem;
   }
   .about-hero-inner {
     grid-template-columns: 1fr; /* stack */
@@ -181,7 +181,7 @@
     padding: 3rem 0rem;
   }
   .about-vision-inner {
-    padding: 0 3rem;
+    padding: 0 1.25rem;
   }
   .about-vision-title {
     font-size: 2rem;
@@ -427,12 +427,11 @@
 }
 
 .about-hero-title {
-  font-size: 2.7rem;
-  line-height: 1.18;
+  font-size: 1.8rem;
+  line-height: 1.1;
   font-weight: 700;
-  margin: 0 0 0.25rem;
-  color: #111;
-  letter-spacing: -0.5px;
+  margin: 0 0 1.5rem;
+  color: #1a1a1a;
 }
 
 .about-hero-description {
@@ -486,18 +485,18 @@
 
 @media (max-width: 1200px) {
   .about-hero-inner { gap: 3rem; grid-template-columns: minmax(0, 560px) 460px; }
-  .about-hero-title { font-size: 2.5rem; }
+  .about-hero-title { font-size: 1.8rem; }
 }
 
 @media (max-width: 1024px) {
   .about-hero-inner { grid-template-columns: minmax(0, 540px) 420px; gap: 2.75rem; }
-  .about-hero-title { font-size: 2.35rem; }
+  .about-hero-title { font-size: 1.8rem; }
 }
 
 @media (max-width: 900px) {
   .about-hero-inner { grid-template-columns: 1fr; gap: 2.5rem; }
   .about-hero-image-wrapper { max-width: 600px; }
-  .about-hero-title { font-size: 2.2rem; }
+  .about-hero-title { font-size: 1.8rem; }
 }
 
 @media (max-width: 768px) {
@@ -505,7 +504,7 @@
     padding-top: 1.5rem; /* was 2.5rem */
   }
   .about-hero {
-    padding: 0.25rem 1rem 2.5rem; /* was 0.5rem 1rem 2.5rem */
+    padding: 1.25rem 0 2.5rem;
   }
   .about-hero-inner {
     grid-template-columns: 1fr; /* stack */
@@ -515,7 +514,7 @@
     max-width: 100%;
   }
   .about-hero-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   .about-hero-description {
     font-size: 1rem;
@@ -528,7 +527,7 @@
 @media (max-width: 640px) {
   .about-page { padding-top: 1.5rem; } /* was 2.5rem */
   .about-hero-inner { padding: 0 1.25rem; }
-  .about-hero-title { font-size: 2rem; }
+  .about-hero-title { font-size: 1.8rem; }
   .about-hero-description { font-size: 0.88rem; }
 }
 

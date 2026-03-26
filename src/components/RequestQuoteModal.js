@@ -1,21 +1,37 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getPublicApiBaseCandidates, resolvePublicApiUrl } from '@/lib/publicApiBase';
 import Toast from './Toast';
 
-async function postJson(url, payload) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+async function postJson(path, payload) {
+  let lastError = null;
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const message = data?.message || 'Request failed.';
-    throw new Error(message);
+  for (const base of getPublicApiBaseCandidates()) {
+    try {
+      const res = await fetch(resolvePublicApiUrl(base, path), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const message = data?.message || 'Request failed.';
+        if (res.status === 404) {
+          lastError = new Error(message);
+          continue;
+        }
+        throw new Error(message);
+      }
+
+      return data;
+    } catch (error) {
+      lastError = error;
+    }
   }
-  return data;
+
+  throw lastError || new Error('Request failed.');
 }
 
 const parseSortNumber = (service) => {
@@ -122,7 +138,7 @@ const RequestQuoteModal = ({ isOpen, onClose, services = [], defaultServiceAlias
     setSubmitState({ state: 'loading', message: 'Submitting your form…' });
 
     try {
-      await postJson('/api/backend/public/quote-requests', {
+      await postJson('/quote-requests', {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),

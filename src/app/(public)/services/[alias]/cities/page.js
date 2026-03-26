@@ -17,6 +17,18 @@ const slugify = (value) =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 
+const normalizeCityField = (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+
+  const lower = normalized.toLowerCase();
+  if (['null', 'undefined', 'n/a', 'na', 'none'].includes(lower)) {
+    return '';
+  }
+
+  return normalized;
+};
+
 const splitCities = (cities) => {
   const domestic = [];
   const international = [];
@@ -49,8 +61,8 @@ export default async function ServiceCitiesRoute({ params }) {
 
   const normalized = (Array.isArray(apiCities) ? apiCities : [])
     .map((city) => {
-      const cityName = String(city?.cityName || city?.name || '').trim();
-      const slug = String(city?.slug || '').trim();
+      const cityName = normalizeCityField(city?.cityName || city?.name);
+      const slug = normalizeCityField(city?.slug);
       if (!cityName || !slug) return null;
       return {
         cityName,

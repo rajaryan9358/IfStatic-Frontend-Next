@@ -28,3 +28,7 @@
 @import '../views/PortfolioPage.css';
 @import '../views/BlogsPage.css';
 @import '../views/BlogDetails.css';
+
+main {
+	padding: 0 !important;
+}

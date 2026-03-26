@@ -219,7 +219,7 @@
   }
 
   .contact-container {
-    padding: 0 2rem;
+    padding: 0 1.25rem;
     grid-template-columns: 1fr;
     gap: 3rem;
   }
@@ -248,7 +248,7 @@
   }
 
   .contact-container {
-    padding: 0 1.5rem;
+    padding: 0 1.25rem;
   }
 
   .contact-title {

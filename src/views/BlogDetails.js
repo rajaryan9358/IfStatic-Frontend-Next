@@ -5,11 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { getRecentBlogs, getSimilarBlogs, shapeBlog } from '../hooks/blogHelpers';
 import RichText from '../components/RichText';
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 }
-};
+import { useResponsiveSectionVariants } from '../lib/useResponsiveSectionVariants';
 
 const sectionTransition = (delay = 0) => ({
   duration: 0.5,
@@ -20,6 +16,7 @@ const sectionTransition = (delay = 0) => ({
 const BlogDetails = ({ slug = '', initialBlog = null, initialBlogs = null, initialBlogsFallback = false, disableClientFetch = false }) => {
   const slugOrId = slug || '';
   const router = useRouter();
+  const sectionVariants = useResponsiveSectionVariants();
   const [searchQuery, setSearchQuery] = useState('');
   const numericId = slugOrId && /^\d+$/.test(slugOrId) ? slugOrId : undefined;
 

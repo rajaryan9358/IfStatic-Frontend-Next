@@ -139,7 +139,7 @@ export default async function PublicLayout({ children }) {
       ) : null}
 
       <Header services={services} />
-      <main style={{ padding: 20 }}>{children}</main>
+      <main style={{ padding: 0, margin: 0 }}>{children}</main>
       <Footer services={services} />
     </>
   );

@@ -7,7 +7,7 @@
 /* Project Hero Section */
 .project-hero {
   background-color: #ffffff;
-  padding: 6rem 1.25rem 4rem;
+  padding: 6rem 1.25rem 0;
 }
 
 .project-hero-inner {
@@ -152,7 +152,7 @@
 /* Project Features Section */
 .project-features {
   background-color: #ffffff;
-  padding: 4rem 1.25rem;
+  padding: 4rem 0;
 }
 
 .project-features-inner {
@@ -221,11 +221,13 @@
 
 .gallery-scroll {
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  cursor: grab;
 }
 
 .gallery-scroll::-webkit-scrollbar {
@@ -233,22 +235,12 @@
 }
 
 .gallery-scroll.is-paused {
-  overflow-x: auto;
-  cursor: grab;
+  cursor: grabbing;
 }
 
 .gallery-track {
   display: flex;
-  animation: scroll 30s linear infinite;
-  width: fit-content;
-}
-
-.gallery-track.paused {
-  animation-play-state: paused;
-}
-
-.gallery-track:hover {
-  animation-play-state: paused;
+  width: max-content;
 }
 
 .gallery-set {
@@ -263,15 +255,6 @@
   object-fit: contain;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
 }
 
 /* Project Tech Stack Section */
@@ -406,7 +389,7 @@
 
 @media (max-width: 768px) {
   .project-hero {
-    padding: 2rem 1rem 3rem;
+    padding: 2rem 0 0;
   }
   
   .project-hero-inner,
@@ -429,6 +412,10 @@
   .project-features,
   .project-tech-stack {
     padding: 3rem 1rem;
+  }
+
+  .project-features {
+    padding: 3rem 0;
   }
   
   .showcase-title,
@@ -501,7 +488,7 @@
 
 @media (max-width: 480px) {
   .project-hero {
-    padding: 1.5rem 0.75rem 2.5rem;
+    padding: 1.5rem 0 0;
   }
   
   .project-hero-title {

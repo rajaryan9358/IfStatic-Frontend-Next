@@ -360,9 +360,13 @@
     padding: 3rem 0;
     min-height: auto;
   }
+
+  .slider-dots {
+    display: none;
+  }
   
   .hero-container {
-    padding: 0 1.5rem;
+    padding: 0 1.25rem;
     gap: 1.5rem;
   }
   
@@ -398,23 +402,11 @@
     width: 180px;
   }
   
-  .slider-dots {
-    gap: 0.6rem;
-  }
-  
-  .slider-dot {
-    width: 10px;
-    height: 10px;
-  }
-  
-  .slider-dot.active {
-    width: 30px;
-  }
 }
 
 @media (max-width: 480px) {
   .hero-container {
-    padding: 0 1rem;
+    padding: 0 1.25rem;
   }
   
   .hero-title {

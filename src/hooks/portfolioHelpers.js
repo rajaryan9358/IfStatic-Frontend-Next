@@ -47,6 +47,33 @@ const shapeCtaButton = (button = {}) => ({
   url: button.url?.trim() || ''
 });
 
+const shapeGalleryItem = (item = {}) => {
+  if (typeof item === 'string') {
+    return {
+      image: resolveMediaUrl(item),
+      showOnMobile: true,
+      showOnTablet: true,
+      showOnDesktop: true
+    };
+  }
+
+  if (!item || typeof item !== 'object') {
+    return {
+      image: '',
+      showOnMobile: true,
+      showOnTablet: true,
+      showOnDesktop: true
+    };
+  }
+
+  return {
+    image: resolveMediaUrl(item.image || item.url || ''),
+    showOnMobile: item.showOnMobile !== false,
+    showOnTablet: item.showOnTablet !== false,
+    showOnDesktop: item.showOnDesktop !== false
+  };
+};
+
 export const shapePortfolio = (item = {}, index = 0) => ({
   id: item.id,
   serviceId: item.serviceId ?? null,
@@ -68,7 +95,7 @@ export const shapePortfolio = (item = {}, index = 0) => ({
   features: shapeList(item.features, shapeFeature),
   techStack: shapeList(item.techStack, shapeTech),
   ctaButtons: shapeList(item.ctaButtons, shapeCtaButton),
-  gallery: Array.isArray(item.gallery) ? item.gallery.map(resolveMediaUrl) : [],
+  gallery: shapeList(item.gallery, shapeGalleryItem),
   metaTitle: item.metaTitle ?? item.meta_title ?? '',
   metaDescription: item.metaDescription ?? item.meta_description ?? '',
   metaSchema: item.metaSchema ?? item.meta_schema ?? '',

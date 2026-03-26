@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { getPublicApiBaseCandidates, resolvePublicApiUrl } from '@/lib/publicApiBase';
 import { mapPathToSeoQuery } from '@/lib/seoRoute';
 
 const toStringSafe = (value) => (typeof value === 'string' ? value : value == null ? '' : String(value));
@@ -130,23 +131,27 @@ const applySeoMetaToDom = (meta) => {
 
 const fetchSeoMeta = async (pathname) => {
   const { pageType, subType } = mapPathToSeoQuery(pathname);
-  const baseCandidates = ['/api/backend/public/meta', '/api/public/meta'];
+  const baseCandidates = getPublicApiBaseCandidates().map((base) => resolvePublicApiUrl(base, '/meta'));
 
   for (const basePath of baseCandidates) {
-    const url = new URL(basePath, window.location.origin);
-    url.searchParams.set('page_type', pageType);
-    if (subType) url.searchParams.set('sub_type', subType);
+    try {
+      const url = new URL(basePath, window.location.origin);
+      url.searchParams.set('page_type', pageType);
+      if (subType) url.searchParams.set('sub_type', subType);
 
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) {
-      if (res.status === 404) {
-        continue;
+      const res = await fetch(url.toString(), { cache: 'no-store' });
+      if (!res.ok) {
+        if (res.status === 404) {
+          continue;
+        }
+        break;
       }
-      break;
-    }
 
-    const json = await res.json().catch(() => ({}));
-    return json?.data || {};
+      const json = await res.json().catch(() => ({}));
+      return json?.data || {};
+    } catch {
+      continue;
+    }
   }
 
   return {

@@ -7,7 +7,7 @@
 .home-portfolio-header {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 4rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -91,7 +91,7 @@
 .home-portfolio-slider {
   display: flex;
   gap: 2rem;
-  padding: 0 4rem;
+  padding: 0 2rem;
   overflow-x: auto;
   scroll-behavior: smooth;
   cursor: grab;
@@ -216,11 +216,11 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .home-portfolio-header {
-    padding: 0 2.5rem;
+    padding: 0 1.5rem;
   }
 
   .home-portfolio-slider {
-    padding: 0 3rem;
+    padding: 0 1.5rem;
   }
 
   .home-portfolio-title {
@@ -247,7 +247,7 @@
   }
 
   .home-portfolio-slider {
-    padding: 0 2rem;
+    padding: 0 1rem;
     gap: 1.5rem;
   }
 
@@ -304,7 +304,7 @@
   }
 
   .home-portfolio-slider {
-    padding: 0 1.5rem;
+    padding: 0 0.75rem;
   }
 
   .home-portfolio-title {

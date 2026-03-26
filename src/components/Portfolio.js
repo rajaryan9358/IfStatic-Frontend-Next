@@ -4,6 +4,32 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RichText from './RichText';
 
+const getSliderMetrics = (container) => {
+  if (!container) {
+    return { cardWidth: 0, gap: 0, positions: [] };
+  }
+
+  const cards = Array.from(container.querySelectorAll('.home-portfolio-card'));
+  const positions = cards.map((card) => card.offsetLeft);
+  const firstCard = cards[0] || null;
+  const cardWidth = firstCard?.getBoundingClientRect().width || 0;
+  const styles = window.getComputedStyle(container);
+  const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0;
+
+  return { cardWidth, gap, positions };
+};
+
+const getNearestIndex = (container) => {
+  const { positions } = getSliderMetrics(container);
+  if (!positions.length) return 0;
+
+  return positions.reduce((closestIndex, position, index) => {
+    const currentDistance = Math.abs(position - container.scrollLeft);
+    const closestDistance = Math.abs(positions[closestIndex] - container.scrollLeft);
+    return currentDistance < closestDistance ? index : closestIndex;
+  }, 0);
+};
+
 const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
   const router = useRouter();
   const portfolios = Array.isArray(initialPortfolios) ? initialPortfolios : [];
@@ -28,9 +54,9 @@ const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
   const handleMouseUp = () => {
     setIsDragging(false);
     const container = scrollContainerRef.current;
-    const cardWidth = 900;
-    const gap = 32;
-    const newIndex = Math.round(container.scrollLeft / (cardWidth + gap));
+    if (!container) return;
+    const newIndex = getNearestIndex(container);
+    scrollToIndex(newIndex);
     setCurrentIndex(newIndex);
     startAutoScroll();
   };
@@ -57,9 +83,9 @@ const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
 
   const handleTouchEnd = () => {
     const container = scrollContainerRef.current;
-    const cardWidth = 900;
-    const gap = 32;
-    const newIndex = Math.round(container.scrollLeft / (cardWidth + gap));
+    if (!container) return;
+    const newIndex = getNearestIndex(container);
+    scrollToIndex(newIndex);
     setCurrentIndex(newIndex);
     startAutoScroll();
   };
@@ -70,19 +96,18 @@ const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
     }
     stopAutoScroll();
     const container = scrollContainerRef.current;
-    const cardWidth = 900;
-    const gap = 32;
-    const scrollAmount = cardWidth + gap;
+    const { positions } = getSliderMetrics(container);
+    if (!positions.length) return;
 
     let newIndex;
     if (dir === 'left') {
       newIndex = Math.max(0, currentIndex - 1);
-      container.scrollLeft -= scrollAmount;
     } else {
       const lastIndex = Math.max(0, portfolios.length - 1);
       newIndex = Math.min(lastIndex, currentIndex + 1);
-      container.scrollLeft += scrollAmount;
     }
+
+    scrollToIndex(newIndex);
     setCurrentIndex(newIndex);
     startAutoScroll();
   };
@@ -98,9 +123,8 @@ const Portfolio = ({ initialPortfolios = null, initialIsFallback = false }) => {
   const scrollToIndex = (index) => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const cardWidth = 900;
-    const gap = 32;
-    const scrollAmount = (cardWidth + gap) * index;
+    const { positions } = getSliderMetrics(container);
+    const scrollAmount = positions[index] ?? 0;
     container.scrollTo({
       left: scrollAmount,
       behavior: 'smooth',

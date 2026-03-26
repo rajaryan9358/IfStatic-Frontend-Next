@@ -6,13 +6,29 @@ import { motion } from 'framer-motion';
 import RequestQuoteModal from '../components/RequestQuoteModal';
 import { shapePortfolio } from '../hooks/portfolioHelpers';
 import RichText from '../components/RichText';
+import { useIsMobileViewport, useResponsiveSectionVariants, useViewportDevice } from '../lib/useResponsiveSectionVariants';
 import './ProjectDetails.css';
 
-const defaultGallery = ['/sample/2.png', '/sample/3.png', '/sample/4.png'];
+const stripRichText = (value) =>
+  String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 }
+const hasContent = (value) => stripRichText(value).length > 0;
+
+const isMeaningfulMedia = (value) => {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return Boolean(normalized) && !normalized.startsWith('/sample/');
+};
+
+const isGalleryVisibleOnDevice = (item, device) => {
+  if (!item || typeof item !== 'object') return false;
+
+  if (device === 'mobile') return item.showOnMobile !== false;
+  if (device === 'tablet') return item.showOnTablet !== false;
+  return item.showOnDesktop !== false;
 };
 
 const sectionTransition = (delay = 0) => ({
@@ -24,6 +40,9 @@ const sectionTransition = (delay = 0) => ({
 const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null, initialServices = [], initialTestimonials = null, initialTestimonialsIsFallback = false }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const isMobileViewport = useIsMobileViewport();
+  const viewportDevice = useViewportDevice();
+  const sectionVariants = useResponsiveSectionVariants();
 
   const slugFromUrl = React.useMemo(() => (
     slug || pathname?.split('/')?.filter(Boolean).pop() || ''
@@ -34,6 +53,8 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
   const [toolPopupPos, setToolPopupPos] = React.useState({ top: 0, left: 0 });
   const hideToolTimerRef = React.useRef(null);
   const scrollContainerRef = React.useRef(null);
+  const galleryScrollRef = React.useRef(null);
+  const galleryFrameRef = React.useRef(null);
   const detailPagePath = slugFromUrl ? `/portfolio/${slugFromUrl}` : '';
 
   const project = React.useMemo(() => {
@@ -74,24 +95,50 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
   const error = '';
   const isFallback = false;
 
-  const galleryImages = project?.gallery?.length ? project.gallery : defaultGallery;
+  const galleryImages = React.useMemo(
+    () => (
+      Array.isArray(project?.gallery)
+        ? project.gallery.filter((item) => isMeaningfulMedia(item?.image) && isGalleryVisibleOnDevice(item, viewportDevice))
+        : []
+    ),
+    [project?.gallery, viewportDevice]
+  );
   const heroLabel = project?.heroCategory || project?.serviceName || 'PROJECT';
   const heroTitle = project?.heroTitle || project?.name || 'Case Study';
   const projectName = project?.name || heroTitle;
   const heroSubtitle = project?.heroSubtitle || project?.description || project?.summary || '';
-  const downloadTitle = project?.downloadTitle || project?.heroTagline || projectName;
-  const downloadDescription = project?.downloadDescription || project?.summary || project?.description || '';
+  const downloadTitle = project?.downloadTitle || '';
+  const downloadDescription = project?.downloadDescription || '';
   const showDownloadSection = project?.showDownloadSection !== false;
   const ctaTitle = project?.ctaTitle || `Let's build the next ${projectName} together.`;
-  const heroImage = project?.image || galleryImages[0] || '/sample/2.png';
-  const features = project?.features || [];
-  const techStack = project?.techStack || [];
-  const ctaButtons = project?.ctaButtons || [];
+  const heroImage = isMeaningfulMedia(project?.image) ? project.image : galleryImages[0]?.image || '';
+  const features = React.useMemo(
+    () => (Array.isArray(project?.features) ? project.features.filter((feature) => hasContent(feature?.title) || hasContent(feature?.description)) : []),
+    [project?.features]
+  );
+  const techStack = React.useMemo(
+    () => (Array.isArray(project?.techStack) ? project.techStack.filter((tech) => hasContent(tech?.name) || isMeaningfulMedia(tech?.icon)) : []),
+    [project?.techStack]
+  );
+  const ctaButtons = React.useMemo(
+    () => (Array.isArray(project?.ctaButtons)
+      ? project.ctaButtons.filter((button) => hasContent(button?.url) && (hasContent(button?.label) || isMeaningfulMedia(button?.image)))
+      : []),
+    [project?.ctaButtons]
+  );
   const websiteUrl = project?.websiteUrl || '';
   const company = project?.company || '';
+  const hasDownloadContent = showDownloadSection && (
+    hasContent(downloadTitle) ||
+    hasContent(downloadDescription) ||
+    ctaButtons.length > 0 ||
+    hasContent(websiteUrl)
+  );
   const feedbacksPerSlide = 3;
   const totalSlides = testimonials.length ? Math.ceil(testimonials.length / feedbacksPerSlide) : 0;
   const [isGalleryPaused, setIsGalleryPaused] = React.useState(false);
+  const galleryDirectionRef = React.useRef(1);
+
   React.useEffect(() => {
     setCurrentSlide(0);
   }, [testimonials.length]);
@@ -110,6 +157,47 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
     scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [testimonials.length]);
+
+  React.useEffect(() => {
+    const galleryElement = galleryScrollRef.current;
+    if (!galleryElement || galleryImages.length === 0) return undefined;
+
+    galleryElement.scrollLeft = 0;
+    galleryDirectionRef.current = 1;
+
+    const speed = galleryImages.length > 1 ? 1.4 : 0.8;
+
+    const tick = () => {
+      if (!isGalleryPaused) {
+        const maxScrollLeft = Math.max(galleryElement.scrollWidth - galleryElement.clientWidth, 0);
+
+        if (maxScrollLeft > 0) {
+          const nextScrollLeft = galleryElement.scrollLeft + speed * galleryDirectionRef.current;
+
+          if (nextScrollLeft <= 0) {
+            galleryElement.scrollLeft = 0;
+            galleryDirectionRef.current = 1;
+          } else if (nextScrollLeft >= maxScrollLeft) {
+            galleryElement.scrollLeft = maxScrollLeft;
+            galleryDirectionRef.current = -1;
+          } else {
+            galleryElement.scrollLeft = nextScrollLeft;
+          }
+        }
+      }
+
+      galleryFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    galleryFrameRef.current = window.requestAnimationFrame(tick);
+
+    return () => {
+      if (galleryFrameRef.current) {
+        window.cancelAnimationFrame(galleryFrameRef.current);
+        galleryFrameRef.current = null;
+      }
+    };
+  }, [galleryImages, isGalleryPaused]);
 
   const scrollToSlide = (index) => {
     if (!scrollContainerRef.current) return;
@@ -193,18 +281,20 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
               {company && <p className="project-hero-company">Built for {company}</p>}
               {error && <p className="project-status warning">{error}</p>}
             </div>
-            <div className="project-hero-image">
-              <img
-                src={heroImage}
-                alt={projectName}
-                className="project-preview-image"
-                loading="lazy"
-                decoding="async"
-                onError={(event) => {
-                  event.currentTarget.src = '/sample/2.png';
-                }}
-              />
-            </div>
+            {heroImage && (
+              <div className="project-hero-image">
+                <img
+                  src={heroImage}
+                  alt={projectName}
+                  className="project-preview-image"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(event) => {
+                    event.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
         </motion.section>
 
@@ -214,7 +304,7 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
             variants={sectionVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: isMobileViewport ? 0.05 : 0.2 }}
             transition={sectionTransition(0.05)}
           >
             <div className="project-features-inner">
@@ -245,33 +335,23 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
           >
             <div className="project-gallery-inner">
               <div
+                ref={galleryScrollRef}
                 className={`gallery-scroll ${isGalleryPaused ? 'is-paused' : ''}`}
                 onMouseEnter={() => setIsGalleryPaused(true)}
                 onMouseLeave={() => setIsGalleryPaused(false)}
+                onTouchStart={() => setIsGalleryPaused(true)}
+                onTouchEnd={() => setIsGalleryPaused(false)}
               >
-                <div className={`gallery-track ${isGalleryPaused ? 'paused' : ''}`}>
+                <div className="gallery-track">
                   <div className="gallery-set">
                     {galleryImages.map((image, index) => (
                       <img
-                        key={`${image}-${index}`}
-                        src={image}
+                        key={`${image.image}-${index}`}
+                        src={image.image}
                         alt={`${projectName} screenshot ${index + 1}`}
                         className="gallery-image"
                         onError={(event) => {
-                          event.currentTarget.src = '/sample/2.png';
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="gallery-set">
-                    {galleryImages.map((image, index) => (
-                      <img
-                        key={`duplicate-${image}-${index}`}
-                        src={image}
-                        alt={`${projectName} screenshot ${index + 1}`}
-                        className="gallery-image"
-                        onError={(event) => {
-                          event.currentTarget.src = '/sample/2.png';
+                          event.currentTarget.style.display = 'none';
                         }}
                       />
                     ))}
@@ -407,7 +487,7 @@ const ProjectDetails = ({ slug = '', initialPortfolio = null, initialMeta = null
           </motion.section>
         )}
 
-        {showDownloadSection && (
+        {hasDownloadContent && (
           <motion.section
             className="project-download"
             variants={sectionVariants}

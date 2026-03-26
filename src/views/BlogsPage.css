@@ -448,7 +448,11 @@
   }
 
   .blogs-header {
-    padding: 3rem 1rem;
+    padding: 3rem 0;
+  }
+
+  .blogs-content {
+    padding: 3rem 0 4rem;
   }
 
   .blogs-header-inner {
@@ -535,11 +539,11 @@
   }
 
   .blogs-header {
-    padding: 2.5rem 0.75rem;
+    padding: 2.5rem 0;
   }
 
   .blogs-content {
-    padding: 3rem 0.75rem 4rem;
+    padding: 3rem 0 4rem;
   }
 
   .blogs-search {
