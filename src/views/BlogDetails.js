@@ -137,7 +137,7 @@ const BlogDetails = ({ slug = '', initialBlog = null, initialBlogs = null, initi
       <motion.main
         className="blog-details-page"
         variants={sectionVariants}
-        initial="hidden"
+        initial={false}
         animate="visible"
         transition={sectionTransition(0)}
       >
@@ -153,7 +153,7 @@ const BlogDetails = ({ slug = '', initialBlog = null, initialBlogs = null, initi
       <motion.main
         className="blog-details-page"
         variants={sectionVariants}
-        initial="hidden"
+        initial={false}
         animate="visible"
         transition={sectionTransition(0)}
       >
@@ -177,16 +177,15 @@ const BlogDetails = ({ slug = '', initialBlog = null, initialBlogs = null, initi
     <motion.main
       className="blog-details-page"
       variants={sectionVariants}
-      initial="hidden"
+      initial={false}
       animate="visible"
       transition={sectionTransition(0)}
     >
       <motion.div
         className="blog-details-container"
         variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
+        initial={false}
+        animate="visible"
         transition={sectionTransition(0.05)}
       >
         <button className="back-btn" onClick={handleBackClick}>
@@ -205,17 +204,15 @@ const BlogDetails = ({ slug = '', initialBlog = null, initialBlogs = null, initi
         <motion.div
           className="blog-details-layout"
           variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          initial={false}
+          animate="visible"
           transition={sectionTransition(0.1)}
         >
           <motion.div
             className="blog-main-column"
             variants={sectionVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            initial={false}
+            animate="visible"
             transition={sectionTransition(0.15)}
           >
             <article className="blog-details-content">
@@ -270,9 +267,8 @@ const BlogDetails = ({ slug = '', initialBlog = null, initialBlogs = null, initi
           <motion.aside
             className="blog-sidebar"
             variants={sectionVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            initial={false}
+            animate="visible"
             transition={sectionTransition(0.2)}
           >
             <div className="blog-widget search-widget">
