@@ -1,8 +1,7 @@
 import React from 'react';
-import { cache } from 'react';
-import Script from 'next/script';
 import { headers } from 'next/headers';
 
+import BodyTagManager from '@/components/BodyTagManager';
 import DevSeoBodyGuard from '@/components/DevSeoBodyGuard';
 import SeoRouteSync from '@/components/SeoRouteSync';
 
@@ -11,17 +10,8 @@ import Footer from '@/components/Footer';
 import { fetchServicesMinimalServer } from '@/services/publicData.service';
 import { getSeoMeta } from '@/lib/seoMeta.server';
 import { mapPathToSeoQuery } from '@/lib/seoRoute';
-import {
-  extractFirstScriptContent,
-  extractNoScriptBlock,
-  safeJsonLd,
-} from '@/lib/seoSanitize.server';
 
 export const dynamic = 'force-dynamic';
-
-const getSeoMetaCached = cache(async (pageType, subType) =>
-  getSeoMeta({ pageType, subType })
-);
 
 const toPathname = (rawValue) => {
   const raw = String(rawValue || '').trim();
@@ -84,7 +74,7 @@ const getPathnameFromHeaders = async () => {
 export async function generateMetadata() {
   const pathname = await getPathnameFromHeaders();
   const { pageType, subType } = mapPathToSeoQuery(pathname);
-  const meta = await getSeoMetaCached(pageType, subType);
+  const meta = await getSeoMeta({ pageType, subType });
 
   return {
     title: meta.meta_title ? { absolute: meta.meta_title } : undefined,
@@ -97,46 +87,14 @@ export default async function PublicLayout({ children }) {
 
   const pathname = await getPathnameFromHeaders();
   const { pageType, subType } = mapPathToSeoQuery(pathname);
-  const meta = await getSeoMetaCached(pageType, subType);
-
-  const gtmHeadJs = extractFirstScriptContent(meta.head_tag_manager);
-  const gtmNoScriptBlock = extractNoScriptBlock(meta.body_tag_manager);
-  const jsonLd = safeJsonLd(meta.meta_schema);
-
-  const gtmNoScriptInner = (() => {
-    const raw = String(gtmNoScriptBlock || '').trim();
-    if (!raw) return '';
-    const m = raw.match(/<noscript\b[^>]*>([\s\S]*?)<\/noscript>/i);
-    if (m && m[1]) return String(m[1]).trim();
-    return raw;
-  })();
+  const meta = await getSeoMeta({ pageType, subType });
 
   return (
     <>
       {process.env.NODE_ENV !== 'production' ? <DevSeoBodyGuard /> : null}
       <SeoRouteSync initialPathname={pathname} initialMeta={meta} />
       {/* body_tag_manager must be FIRST inside <body> */}
-      {gtmNoScriptInner ? (
-        <noscript id="ifstatic-body-tag-manager" data-ifstatic-body-tag-manager="true" dangerouslySetInnerHTML={{ __html: gtmNoScriptInner }} />
-      ) : null}
-
-      {/* head_tag_manager: GTM script in <head> */}
-      {gtmHeadJs ? (
-        <Script id="gtm" data-ifstatic-seo="head-tag-manager" strategy="beforeInteractive">
-          {gtmHeadJs}
-        </Script>
-      ) : null}
-
-      {/* schema: JSON-LD in <head> */}
-      {jsonLd ? (
-        <Script
-          id="jsonld"
-          type="application/ld+json"
-          data-ifstatic-seo="jsonld"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: jsonLd }}
-        />
-      ) : null}
+      <BodyTagManager html={meta.body_tag_manager} />
 
       <Header services={services} />
       <main style={{ padding: 0, margin: 0 }}>{children}</main>

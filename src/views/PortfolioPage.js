@@ -78,12 +78,10 @@ const PortfolioPage = ({
     const next = normalizeServiceSlug(tab);
     setActiveTab(next);
 
-    if (next === 'all') {
-      router.push('/portfolio');
-      return;
+    if (typeof window !== 'undefined') {
+      const nextPath = next === 'all' ? '/portfolio' : `/portfolio/${next}`;
+      window.history.replaceState(window.history.state, '', nextPath);
     }
-
-    router.push(`/portfolio/${next}`);
   };
 
   const serviceLookup = useMemo(() => {

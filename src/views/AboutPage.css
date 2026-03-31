@@ -132,13 +132,14 @@
 /* Vision Section */
 .about-vision {
   background-color: #ffffff;
-  padding: 3rem 0rem;
+  padding: 2rem 1.25rem;
 }
 
 .about-vision-inner {
-  max-width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
   width: 100%;
-  padding: 0 3rem;
+  padding: 0 4rem;
   text-align: left;
 }
 
@@ -178,7 +179,7 @@
 
 @media (max-width: 768px) {
   .about-vision {
-    padding: 3rem 0rem;
+    padding: 1.25rem 0 2.5rem;
   }
   .about-vision-inner {
     padding: 0 1.25rem;
@@ -192,9 +193,6 @@
 }
 
 @media (max-width: 480px) {
-  .about-vision {
-    padding: 3rem 0rem;
-  }
   .about-vision-title {
     font-size: 1.8rem;
   }

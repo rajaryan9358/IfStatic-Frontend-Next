@@ -120,7 +120,7 @@ const Footer = ({ services = [] }) => {
 
         <div className="footer-bottom">
           <div className="footer-bottom-content">
-            <p className="footer-copyright">Copyright © 2025 IfStatic Technologies. All Rights Reserved.</p>
+            <p className="footer-copyright">Copyright © 2026 IfStatic Technologies. All Rights Reserved.</p>
             <div className="footer-legal">
               <Link href="/terms-and-conditions">Terms & Conditions</Link>
               <Link href="/privacy-policy">Privacy Policy</Link>

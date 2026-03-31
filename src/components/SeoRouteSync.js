@@ -7,52 +7,110 @@ import { mapPathToSeoQuery } from '@/lib/seoRoute';
 
 const toStringSafe = (value) => (typeof value === 'string' ? value : value == null ? '' : String(value));
 
-const stripComments = (html) => toStringSafe(html).replace(/<!--([\s\S]*?)-->/g, '');
+const toReactAttrName = (name) => {
+  const key = String(name || '').trim();
+  const lower = key.toLowerCase();
 
-const stripForbiddenTags = (html) =>
-  toStringSafe(html)
-    .replace(/<\s*\/?\s*(html|head|body)\b[^>]*>/gi, '')
-    .replace(/<\s*title\b[^>]*>[\s\S]*?<\s*\/\s*title\s*>/gi, '')
-    .replace(/<\s*meta\b[^>]*>/gi, '')
-    .replace(/<\s*link\b[^>]*>/gi, '')
-    .replace(/<\s*base\b[^>]*>/gi, '');
-
-const extractFirstScriptContent = (html) => {
-  const cleaned = stripForbiddenTags(stripComments(html)).trim();
-  if (!cleaned) return '';
-
-  const match = cleaned.match(/<script\b[^>]*>([\s\S]*?)<\/script>/i);
-  if (match?.[1]) return String(match[1]).trim();
-  if (!cleaned.includes('<') && !cleaned.includes('>')) return cleaned;
-  return '';
+  if (lower === 'classname') return 'class';
+  if (lower === 'httpEquiv') return 'http-equiv';
+  if (lower === 'charSet') return 'charset';
+  if (lower === 'crossOrigin') return 'crossorigin';
+  if (lower === 'referrerPolicy') return 'referrerpolicy';
+  return key;
 };
 
-const extractNoScriptInner = (html) => {
-  const cleaned = stripForbiddenTags(stripComments(html)).trim();
-  if (!cleaned) return '';
+const parseAttributes = (attrString) => {
+  const attrs = {};
+  const raw = toStringSafe(attrString);
+  if (!raw.trim()) return attrs;
 
-  const match = cleaned.match(/<noscript\b[^>]*>([\s\S]*?)<\/noscript>/i);
-  if (match?.[1]) return String(match[1]).trim();
-  if (cleaned.includes('<iframe')) return cleaned;
-  return '';
-};
-
-const safeJsonLd = (jsonString) => {
-  const raw = toStringSafe(jsonString).trim();
-  if (!raw) return '';
-
-  let candidate = raw;
-  if (candidate.toLowerCase().includes('<script')) {
-    const match = candidate.match(/<script\b[^>]*>([\s\S]*?)<\/script>/i);
-    candidate = match?.[1] ? String(match[1]).trim() : '';
+  const re = /([^\s=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>`]+)))?/g;
+  let match;
+  while ((match = re.exec(raw))) {
+    const name = toReactAttrName(match[1]);
+    const value = match[2] ?? match[3] ?? match[4];
+    attrs[name] = value === undefined ? '' : String(value);
   }
 
-  if (!candidate) return '';
+  return attrs;
+};
+
+const extractScripts = (html) => {
+  const raw = toStringSafe(html).trim();
+  if (!raw) return [];
+
+  const scripts = [];
+  const reScript = /<script([^>]*)>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = reScript.exec(raw))) {
+    scripts.push({ attrs: parseAttributes(match[1] || ''), body: String(match[2] || '').trim() });
+  }
+
+  if (!scripts.length && !raw.includes('<') && !raw.includes('>')) {
+    scripts.push({ attrs: {}, body: raw });
+  }
+
+  return scripts;
+};
+
+const normalizeNoScriptBody = (value) => {
+  let output = toStringSafe(value).trim();
+  if (!output) return '';
+
+  output = output
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\\"/g, '"');
+
+  const isWrappedInQuotes =
+    (output.startsWith('"') && output.endsWith('"')) ||
+    (output.startsWith("'") && output.endsWith("'"));
+
+  if (isWrappedInQuotes) {
+    const inner = output.slice(1, -1).trim();
+    if (inner.includes('<iframe')) output = inner;
+  }
+
+  return output;
+};
+
+const extractNoScripts = (html) => {
+  const raw = toStringSafe(html).trim();
+  if (!raw) return [];
+
+  const blocks = [];
+  const reNoScript = /<noscript([^>]*)>([\s\S]*?)<\/noscript>/gi;
+  let match;
+  while ((match = reNoScript.exec(raw))) {
+    blocks.push({ attrs: parseAttributes(match[1] || ''), body: normalizeNoScriptBody(match[2] || '') });
+  }
+
+  if (!blocks.length && raw.includes('<iframe')) {
+    blocks.push({ attrs: {}, body: normalizeNoScriptBody(raw) });
+  }
+
+  return blocks;
+};
+
+const normalizeJsonLdString = (value) => {
+  const raw = toStringSafe(value).trim();
+  if (!raw) return '';
+
+  if (raw.toLowerCase().includes('<script')) {
+    const match = raw.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+    const inner = match?.[1] ? String(match[1]).trim() : '';
+    if (!inner) return '';
+    try {
+      return JSON.stringify(JSON.parse(inner));
+    } catch {
+      return inner;
+    }
+  }
 
   try {
-    return JSON.stringify(JSON.parse(candidate)).replace(/<\/script/gi, '<\\/script');
+    return JSON.stringify(JSON.parse(raw));
   } catch {
-    return '';
+    return raw;
   }
 };
 
@@ -76,39 +134,57 @@ const upsertDescription = (content) => {
   el.setAttribute('content', value);
 };
 
-const upsertHeadScript = ({ id, dataType, content, type }) => {
-  let script = document.head.querySelector(`#${id}`);
-
-  if (!script) {
-    script = document.createElement('script');
-    script.id = id;
-    document.head.appendChild(script);
-  }
-
-  if (dataType) {
-    script.dataset.ifstaticSeo = dataType;
-  }
-
-  if (type) {
-    script.type = type;
-  } else {
-    script.removeAttribute('type');
-  }
-
-  script.textContent = toStringSafe(content);
+const removeManagedHeadScripts = (dataType) => {
+  document.head
+    .querySelectorAll(`script[data-ifstatic-seo="${dataType}"]`)
+    .forEach((node) => node.remove());
 };
 
-const upsertBodyNoScript = (content) => {
-  let noScript = document.body.querySelector('#ifstatic-body-tag-manager');
+const appendManagedHeadScripts = (dataType, scripts) => {
+  removeManagedHeadScripts(dataType);
 
-  if (!noScript) {
-    noScript = document.createElement('noscript');
-    noScript.id = 'ifstatic-body-tag-manager';
+  scripts.forEach(({ attrs = {}, body = '' }) => {
+    const script = document.createElement('script');
+    script.dataset.ifstaticSeo = dataType;
+
+    Object.entries(attrs).forEach(([key, value]) => {
+      if (value === '') {
+        script.setAttribute(key, '');
+      } else {
+        script.setAttribute(key, String(value));
+      }
+    });
+
+    script.textContent = toStringSafe(body);
+    document.head.appendChild(script);
+  });
+};
+
+const replaceManagedBodyNoScripts = (blocks) => {
+  document.body
+    .querySelectorAll('noscript[data-ifstatic-body-tag-manager="true"]')
+    .forEach((node) => node.remove());
+
+  if (!blocks.length) return;
+
+  const fragment = document.createDocumentFragment();
+  blocks.forEach(({ attrs = {}, body = '' }) => {
+    const noScript = document.createElement('noscript');
     noScript.dataset.ifstaticBodyTagManager = 'true';
-    document.body.prepend(noScript);
-  }
 
-  noScript.innerHTML = toStringSafe(content);
+    Object.entries(attrs).forEach(([key, value]) => {
+      if (value === '') {
+        noScript.setAttribute(key, '');
+      } else {
+        noScript.setAttribute(key, String(value));
+      }
+    });
+
+    noScript.innerHTML = toStringSafe(body);
+    fragment.appendChild(noScript);
+  });
+
+  document.body.prepend(fragment);
 };
 
 const applySeoMetaToDom = (meta) => {
@@ -119,14 +195,23 @@ const applySeoMetaToDom = (meta) => {
 
   upsertDescription(meta?.meta_description);
 
-  const headScript = extractFirstScriptContent(meta?.head_tag_manager);
-  upsertHeadScript({ id: 'gtm', dataType: 'head-tag-manager', content: headScript });
+  const headScripts = extractScripts(meta?.head_tag_manager);
+  appendManagedHeadScripts('head-tag-manager', headScripts);
 
-  const jsonLd = safeJsonLd(meta?.meta_schema);
-  upsertHeadScript({ id: 'jsonld', dataType: 'jsonld', type: 'application/ld+json', content: jsonLd });
+  const rawSchema = toStringSafe(meta?.meta_schema).trim();
+  const schemaAsScripts = /<script\b/i.test(rawSchema) ? extractScripts(rawSchema) : [];
+  if (schemaAsScripts.length) {
+    appendManagedHeadScripts('jsonld', schemaAsScripts);
+  } else {
+    const normalizedSchema = normalizeJsonLdString(rawSchema);
+    const fallback = normalizedSchema
+      ? [{ attrs: { type: 'application/ld+json' }, body: normalizedSchema }]
+      : [];
+    appendManagedHeadScripts('jsonld', fallback);
+  }
 
-  const noScriptInner = extractNoScriptInner(meta?.body_tag_manager);
-  upsertBodyNoScript(noScriptInner);
+  const noScriptBlocks = extractNoScripts(meta?.body_tag_manager);
+  replaceManagedBodyNoScripts(noScriptBlocks);
 };
 
 const fetchSeoMeta = async (pathname) => {
@@ -174,7 +259,6 @@ export default function SeoRouteSync({ initialPathname = '/', initialMeta = null
       if (!initialAppliedRef.current && pathname === initialPathname && initialMeta) {
         applySeoMetaToDom(initialMeta);
         initialAppliedRef.current = true;
-        return;
       }
 
       const meta = await fetchSeoMeta(pathname);

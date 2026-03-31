@@ -1,7 +1,5 @@
 import 'server-only';
 
-import { cache } from 'react';
-
 const DEFAULT_BASE_URL = 'http://127.0.0.1:5003';
 
 const getBaseUrl = () => {
@@ -16,7 +14,28 @@ const getBaseUrl = () => {
 
 const toStringSafe = (value) => (typeof value === 'string' ? value : value == null ? '' : String(value));
 
-const getSeoMetaCached = cache(async (page_type, sub_type) => {
+const normalizeNoScriptBody = (value) => {
+  let output = toStringSafe(value).trim();
+  if (!output) return '';
+
+  output = output
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\\"/g, '"');
+
+  const isWrappedInQuotes =
+    (output.startsWith('"') && output.endsWith('"')) ||
+    (output.startsWith("'") && output.endsWith("'"));
+
+  if (isWrappedInQuotes) {
+    const inner = output.slice(1, -1).trim();
+    if (inner.includes('<iframe')) output = inner;
+  }
+
+  return output;
+};
+
+const getSeoMetaData = async (page_type, sub_type) => {
 
   if (!page_type) {
     return {
@@ -34,7 +53,7 @@ const getSeoMetaCached = cache(async (page_type, sub_type) => {
 
   try {
     const res = await fetch(url.toString(), {
-      next: { revalidate: 60 }
+      cache: 'no-store'
     });
 
     if (!res.ok) {
@@ -66,12 +85,12 @@ const getSeoMetaCached = cache(async (page_type, sub_type) => {
       body_tag_manager: ''
     };
   }
-});
+};
 
 export const getSeoMeta = ({ pageType, subType = '' } = {}) => {
   const page_type = toStringSafe(pageType).trim().toLowerCase();
   const sub_type = toStringSafe(subType).trim().toLowerCase();
-  return getSeoMetaCached(page_type, sub_type);
+  return getSeoMetaData(page_type, sub_type);
 };
 
 
@@ -119,10 +138,10 @@ export const extractFirstNoScriptInnerHtml = (html) => {
   if (!raw.trim()) return '';
 
   const match = raw.match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i);
-  if (match && match[1]) return String(match[1]).trim();
+  if (match && match[1]) return normalizeNoScriptBody(match[1]);
 
   // If user pasted only iframe HTML
-  if (raw.includes('<iframe')) return raw.trim();
+  if (raw.includes('<iframe')) return normalizeNoScriptBody(raw);
 
   return '';
 };
@@ -156,9 +175,9 @@ export const extractNoScriptInnerHtml = (html) => {
   if (!trimmed) return '';
 
   const match = raw.match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i);
-  if (match && match[1]) return String(match[1]).trim();
+  if (match && match[1]) return normalizeNoScriptBody(match[1]);
 
-  if (raw.includes('<iframe')) return trimmed;
+  if (raw.includes('<iframe')) return normalizeNoScriptBody(trimmed);
 
   return '';
 };
@@ -227,13 +246,13 @@ export const extractNoScripts = (html) => {
   let match;
   while ((match = reNoScript.exec(raw))) {
     const attrs = parseAttributes(match[1] || '');
-    const body = (match[2] || '').trim();
+    const body = normalizeNoScriptBody(match[2] || '');
     blocks.push({ attrs, body });
   }
 
   // Fallback: allow iframe-only content without a <noscript> wrapper.
   if (!blocks.length && trimmed.includes('<iframe')) {
-    blocks.push({ attrs: {}, body: trimmed });
+    blocks.push({ attrs: {}, body: normalizeNoScriptBody(trimmed) });
   }
 
   return blocks;
