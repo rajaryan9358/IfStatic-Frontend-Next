@@ -79,6 +79,9 @@ export async function generateMetadata() {
   return {
     title: meta.meta_title ? { absolute: meta.meta_title } : undefined,
     description: meta.meta_description || undefined,
+    verification: {
+      google: 'fSOaEIINcaxtyfbDRIqZuyd374xfUxUYFDvmpm3St6o',
+    },
   };
 }
 
