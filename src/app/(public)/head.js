@@ -54,6 +54,7 @@ const getPathnameFromHeaders = async () => {
 
 export default async function Head() {
   const pathname = await getPathnameFromHeaders();
+  const isHomePage = pathname === '/';
   const { pageType, subType } = mapPathToSeoQuery(pathname);
   const meta = await getSeoMeta({ pageType, subType });
 
@@ -65,6 +66,13 @@ export default async function Head() {
 
   return (
     <>
+      {isHomePage ? (
+        <meta
+          name="google-site-verification"
+          content="fSOaEIINcaxtyfbDRIqZuyd374xfUxUYFDvmpm3St6o"
+        />
+      ) : null}
+
       {headTagManagerScripts.map((script, index) => (
         <script
           key={`head-tag-manager-${index}`}
