@@ -1,10 +1,10 @@
 import React from 'react';
 
 const defaultTeam = [
-  { id: 1, name: 'Aryan Raj', role: 'Full Stack Developer', image: '/team/aryan-raj.jpg' },
-  { id: 2, name: 'Aman Raj', role: 'Website Designer & Digital Marketer', image: '/team/aman-raj.jpg' },
-  { id: 3, name: 'Sumit Pandey', role: 'Website Developer', image: '/team/sumit-pandey.jpg' },
-  { id: 4, name: 'Shubham Bora', role: 'Senior SEO Executive', image: '/team/shubham-bora.jpg' },
+  { id: 1, name: 'Aryan Raj', role: 'Full Stack Developer', image: '/team/aryan.png' },
+  { id: 2, name: 'Aman Raj', role: 'Website Designer & Digital Marketer', image: '/team/aman.png' },
+  { id: 3, name: 'Sumit Pandey', role: 'Website Developer', image: '/team/sumit.png' },
+  { id: 4, name: 'Shubham Bora', role: 'Senior SEO Executive', image: '/team/shubham.png' },
 ];
 
 const Team = () => {

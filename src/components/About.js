@@ -97,10 +97,10 @@ const About = () => {
               <h3 className="team-title">Meet the people building your product</h3>
               <div className="team-grid">
                 {[
-                  { name: 'Aman Raj', photo: 'aman.jpg', role: 'CEO' },
-                  { name: 'Aryan Raj', photo: 'aryan.jpg', role: 'CTO' },
-                  { name: 'Sumit Pandey', photo: 'sumit.jpg', role: 'Lead Engineer' },
-                  { name: 'Shubham Bora', photo: 'shubham.jpg', role: 'Product Designer' },
+                  { name: 'Aman Raj', photo: 'aman.png', role: 'CEO' },
+                  { name: 'Aryan Raj', photo: 'aryan.png', role: 'CTO' },
+                  { name: 'Sumit Pandey', photo: 'sumit.png', role: 'Lead Engineer' },
+                  { name: 'Shubham Bora', photo: 'shubham.png', role: 'Product Designer' },
                 ].map((member) => (
                   <div className="team-member" key={member.name}>
                     <img
@@ -109,7 +109,7 @@ const About = () => {
                       className="team-photo"
                       onError={(e) => {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = '/team/placeholder.png';
+                        e.currentTarget.src = '/team/aman.png';
                       }}
                     />
                     <div className="team-meta">
