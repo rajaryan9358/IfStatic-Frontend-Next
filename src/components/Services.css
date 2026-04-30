@@ -12,7 +12,7 @@
 /* Header Section */
 .services-header {
   text-align: left;
-  margin-bottom: 4rem;
+  margin-bottom: 1.2rem;
 }
 
 .services-label {
@@ -36,6 +36,17 @@
   color: #666;
   line-height: 1.8;
   max-width: 800px;
+}
+
+/* When the description is rendered full-width but should align with container content */
+.services-description--fullwidth {
+  box-sizing: border-box;
+  max-width: 1400px;
+  margin: 0.5rem auto 2rem auto;
+  padding: 0 4rem;
+  font-size: 1.05rem;
+  color: #666;
+  line-height: 1.8;
 }
 
 /* Services Grid */
@@ -115,6 +126,10 @@
     padding: 0 2.5rem;
   }
 
+  .services-description--fullwidth {
+    padding: 0 2.5rem;
+  }
+
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.8rem;
@@ -135,7 +150,7 @@
   }
 
   .services-header {
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
   }
 
   .services-title {
@@ -144,6 +159,10 @@
 
   .services-description {
     font-size: 0.95rem;
+  }
+
+  .services-description--fullwidth {
+    padding: 0 1.25rem;
   }
 
   .services-grid {
@@ -171,6 +190,10 @@
 
   .services-description {
     font-size: 0.9rem;
+  }
+
+  .services-description--fullwidth {
+    padding: 0 1.25rem;
   }
 
   .service-card {
