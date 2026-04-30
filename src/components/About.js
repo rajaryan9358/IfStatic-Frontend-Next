@@ -88,10 +88,42 @@ const About = () => {
               <rect x="320" y="100" width="8" height="8" fill="#CB356B" opacity="0.4" transform="rotate(45 324 104)"/>
             </svg>
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
+
+          <div className="about-team">
+            <div className="about-container">
+              <p className="about-label">OUR TEAM</p>
+              <h3 className="team-title">Meet the people building your product</h3>
+              <div className="team-grid">
+                {[
+                  { name: 'Aman Raj', photo: 'aman.jpg', role: 'CEO' },
+                  { name: 'Aryan Raj', photo: 'aryan.jpg', role: 'CTO' },
+                  { name: 'Sumit Pandey', photo: 'sumit.jpg', role: 'Lead Engineer' },
+                  { name: 'Shubham Bora', photo: 'shubham.jpg', role: 'Product Designer' },
+                ].map((member) => (
+                  <div className="team-member" key={member.name}>
+                    <img
+                      src={`/team/${member.photo}`}
+                      alt={member.name}
+                      className="team-photo"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/team/placeholder.png';
+                      }}
+                    />
+                    <div className="team-meta">
+                      <div className="team-name">{member.name}</div>
+                      <div className="team-role">{member.role}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
     </section>
   );
 };
 
 export default About;
+

@@ -164,12 +164,14 @@ const Services = ({ initialServices = null }) => {
         <div className="services-header">
           <p className="services-label">OUR SERVICES</p>
           <h2 className="services-title">What We're Offering?</h2>
-          <p className="services-description">
-            Lorem ipsum dolor sit amet consectetur. Condimentum lectus posuere augue et lorem mollis elementum dignissim ornare.
-            Malesuada facilisi pretium vitae odio. Urna ultrices quis elit mi vitae.
-          </p>
         </div>
+      </div>
 
+      <p className="services-description services-description--fullwidth">
+        We provide end-to-end digital solutions to help your business grow, scale, and stand out in a competitive market. From mobile apps and websites to custom software, design, marketing, and AI integration, our services are built with performance, user experience, and long-term success in mind. We focus on delivering reliable, scalable, and result-driven solutions tailored to your unique business needs.
+      </p>
+
+      <div className="services-container">
         <div className="services-grid">
           {mappedServices.map((service) => {
             const servicePath = `/services/${service.alias}`;
